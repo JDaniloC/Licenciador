@@ -1,0 +1,44 @@
+<section class="dashboard">
+    <section class="clients">
+        <div>
+            <h2> Clientes cadastrados </h2>
+            <select 
+                name="clients" 
+                id="clientdropdown" 
+                onChange="selectClient(this)">
+                <option value=""> 
+                    Selecionar 
+                </option>
+            </select>
+        </div>
+        <div> 
+            <h2> Cadastrar novo cliente </h2>
+            <form onsubmit = "saveClient(this)" 
+                method="POST">
+                <input type="email" placeholder="E-mail" required>
+                <button type="submit"> 
+                    Adicionar novo cliente 
+                </button>
+            </form>
+        </div>
+    </section>
+    <section class="client-settings">
+        <h2> Dados do cliente </h2>
+        <form>
+            <input id = "emailpreview" placeholder = "E-mail" disabled>
+            <input type="number" id="licensedayspreview"
+                placeholder = "Dias da licença" disabled>
+            <input type="number" required
+                name="licensedays" 
+                id="licensedays" min = 1 max = 31
+                placeholder = "Dias da licença">
+            <div>
+                <button> 
+                    Teste grátis 
+                </button>
+                <button> Renovar licença </button>
+            </div>
+        </form>
+    </section>
+</section>
+<script type = "text/javascript" src = "scripts/clients.js"></script>
