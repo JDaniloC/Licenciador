@@ -46,3 +46,14 @@ button.acceptbtn {
     background-color: #85f73e;
     border: none;
 }
+div.checkshowbots {
+    border: solid 0.1px #666;
+    border-radius: 2px;
+    margin: 0!important;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+div.checkshowbots * {
+    padding: 0!important;
+}

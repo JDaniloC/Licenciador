@@ -1,6 +1,6 @@
 function loadBotlist() {
     $.ajax({
-        url: "http://localhost:8000" + '/bots',
+        url: BASEURL + '/bots',
         method: 'GET',
         success: function(response) {
             Object.keys(response).forEach(botname => {
@@ -11,11 +11,13 @@ function loadBotlist() {
     });
 }
 
-function selectBot(button) {
-    localStorage.setItem("bot", button.id)
-    document.querySelector(
+function selectBot(bot) {
+    localStorage.setItem("bot", bot.id)
+    let button = document.querySelector(
         "header button"
-    ).style.opacity = 100;
+    )
+    button.style.opacity = 100;
+    button.disabled = false;
     $("main").load("views/clients.html");
 }
 
@@ -26,6 +28,9 @@ function addBot(bot) {
     if (account["botlist"].indexOf(
         bot.name) === -1) {
         button.disabled = true;
+        if (!account.show) {
+            button.style.display = "none";
+        }
     }
     button.id = bot.name;
     button.addEventListener('click', () => selectBot(button));

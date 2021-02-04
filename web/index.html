@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Licenciador </title>
+    <link rel="shortcut icon" href="./assets/favicon.png" type="image/x-icon">
+    
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/login.css">
     <link rel="stylesheet" href="styles/sellers.css">
     <link rel="stylesheet" href="styles/botlist.css">
     <link rel="stylesheet" href="styles/clients.css">
-    
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
     </script> 
     <script type = "text/javascript" src = "scripts/login.js"></script>
@@ -29,7 +30,7 @@
         </form>
     </section>
     <header>
-        <button onclick = 'backToBotlist()'>
+        <button onclick = 'backToBotlist()' disabled>
             <img src="https://img.icons8.com/clouds/344/back.png" alt="backimg">
         </button>
         <h1> Licenciador </h1>
@@ -38,19 +39,31 @@
             <img src="https://i.pinimg.com/originals/c1/2d/c5/c12dc536b8f8797b629eb9942a2dbbf1.gif">
         </div>
         <div>
-            <p id = "licenseNumber"> 00 </p>
+            <p id = "testNumber"> 00 </p>
             <img src="https://i.pinimg.com/originals/c1/2d/c5/c12dc536b8f8797b629eb9942a2dbbf1.gif">
         </div>
+        <button style = "opacity: 1" onclick = "closeAccount()">
+            <img src="https://i.ibb.co/dkd6LYY/shutdown.png" alt="exit image">
+        </button>
     </header>
     <main></main>
+    <footer>
+        <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+    </footer>
 </body>
 <script>
+    const clients = {};
+    const sellers = {};
+    const BASEURL = "http://localhost:8000"
     function backToBotlist() {
         $("main").load("views/botlist.html");
-        document.querySelector(
-            "header button"
-        ).style.opacity = 0;
+        let button = document.querySelector(
+            "header button")
+        button.disabled = true;
+        button.style.opacity = 0;
     }
-    // $("main").load("views/clients.html");
+    if (localStorage.getItem("account")) {
+        removeLogin()
+    }
 </script>
 </html>

@@ -5,7 +5,9 @@
       "password": "fd3491dfb4ecab569ea39ba956133486"
     },
     "josedanilosilva2013@gmail.com": {
-      "licenses": 20,
+      "licenses": 30,
+      "tests": 60,
+      "show": false,
       "botlist": [
         "iqbot",
         "telegramiq",
@@ -16,6 +18,8 @@
     },
     "daniel123dan@hotmail.com": {
       "licenses": 50,
+      "tests": 100,
+      "show": true,
       "botlist": [
         "iqbot",
         "telegramiq",
@@ -29,16 +33,19 @@
       ],
       "type": "seller",
       "password": "e83bedd216f67a767441d97687039bd3"
+    },
+    "exemplo@email.com": {
+      "licenses": 99,
+      "botlist": [
+        "telebot"
+      ],
+      "show": true,
+      "type": "seller",
+      "tests": 200,
+      "password": "432623e459cc064c86552d0c77285d77"
     }
   },
-  "clients": {
-    "jdsc@cin.ufpe.br": {
-      "seller": "josedanilosilva2013@gmail.com",
-      "licenses": {
-        "iqbot": 0
-      }
-    }
-  },
+  "clients": {},
   "bots": {
     "iqbot": {
       "id": 0,

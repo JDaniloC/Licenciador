@@ -3,19 +3,28 @@
         <div>
             <h2> Vendedores cadastrados </h2>
             <select id="clientdropdown" onchange = "selectSeller(this)">
+                <option value=""> 
+                    Selecionar 
+                </option>
             </select>
         </div>
         <div> 
             <h2> Cadastrar novo vendedor </h2>
-            <form onsubmit="saveSeller(event); return false" 
-                method="post">
+            <form onsubmit="return false" method="post">
                 <input type="email" placeholder="E-mail" 
                     id="selleremail" required>
                 <input type="number" 
                     id="licensedays" min = 1 required
                     placeholder = "Quantidade de licenças">
-                <button type="submit"> 
+                <div class = "checkshowbots">
+                    <label for="show"> Mostrar demais bots </label>
+                    <input type="checkbox" name="show" id="show">
+                </div>
+                <button onclick = "saveSeller(event)"> 
                     Adicionar/Salvar vendedor 
+                </button>
+                <button onclick = "deleteSeller(event)">
+                    Deletar vendedor
                 </button>
             </form>
         </div>

@@ -13,10 +13,9 @@
         </div>
         <div> 
             <h2> Cadastrar novo cliente </h2>
-            <form onsubmit = "saveClient(this)" 
-                method="POST">
-                <input type="email" placeholder="E-mail" required>
-                <button type="submit"> 
+            <form onsubmit = "return false;">
+                <input type="email" placeholder="E-mail" id = "newclient" required>
+                <button onclick="saveClients()"> 
                     Adicionar novo cliente 
                 </button>
             </form>
@@ -24,20 +23,21 @@
     </section>
     <section class="client-settings">
         <h2> Dados do cliente </h2>
-        <form>
+        <form onsubmit = "return false;">
             <input id = "emailpreview" placeholder = "E-mail" disabled>
             <input type="number" id="licensedayspreview"
                 placeholder = "Dias da licença" disabled>
-            <input type="number" required
-                name="licensedays" 
-                id="licensedays" min = 1 max = 31
-                placeholder = "Dias da licença">
             <div>
-                <button> 
+                <button onclick = "giveLicense(true); return false;"> 
                     Teste grátis 
                 </button>
-                <button> Renovar licença </button>
+                <button onclick = "giveLicense()"> 
+                    Renovar licença 
+                </button>
             </div>
+            <button onclick = "deleteUser()"> 
+                Deletar usuário 
+            </button>
         </form>
     </section>
 </section>

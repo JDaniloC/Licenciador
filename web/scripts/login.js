@@ -20,7 +20,7 @@ function login(form) {
     const password = passwordInput.value;
     
     $.ajax({
-        url: "http://localhost:8000" + '/login', 
+        url: BASEURL + '/login', 
         type: 'POST',
         data: JSON.stringify({ email, password }),
         success: function(data) {
@@ -42,14 +42,23 @@ function removeLogin() {
     document.querySelector(".login").style.display = "none";
 
     const licenses = document.querySelector('#licenseNumber');
+    const tests = document.querySelector('#testNumber');
     const account = JSON.parse(localStorage.getItem('account'));
     // Aparece apenas os bots
 
     if (account.type == "admin") {
         licenses.innerText = "∞";
+        tests.innerText = "∞";
         $("main").load("views/sellers.html");
     } else {
         licenses.innerText = account.licenses;
+        tests.innerText = account.tests;
         $("main").load("views/botlist.html");
     }
+}
+
+function closeAccount() {
+    localStorage.removeItem('account');
+    localStorage.removeItem('bot');
+    location.reload();
 }

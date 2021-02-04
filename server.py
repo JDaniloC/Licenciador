@@ -1,13 +1,14 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import unquote
-import json, hashlib, threading
+from datetime import timedelta
+import json, hashlib, time
 
 class Server(BaseHTTPRequestHandler):
     def _set_headers(self, code = 204):
         self.send_response(code)
         self.send_header("Content-type", "application/json")
         self.send_header('Access-Control-Allow-Origin', '*')                
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, DELETE')
         self.send_header("Access-Control-Allow-Headers", "X-Requested-With") 
         self.end_headers()
     
@@ -15,24 +16,21 @@ class Server(BaseHTTPRequestHandler):
         self._set_headers()
     
     def _json(self, data):
-        """This just generates an HTML document that includes `message`
-        in the body. Override, or re-write this do do more interesting stuff.
-        """
         content = json.dumps(data)
         return content.encode("utf-8")
     
     def get_sellers(self, email = None):
-        with open("database.json") as file:
+        with open("database.json", encoding='utf-8') as file:
             dic = json.load(file)['sellers']
         return dic if email is None else dic.get(email)
     
     def get_clients(self, email = None):
-        with open("database.json") as file:
+        with open("database.json", encoding='utf-8') as file:
             dic = json.load(file)['clients']
         return dic if email is None else dic.get(email)
 
     def get_bots(self):
-        with open("database.json") as file:
+        with open("database.json", encoding='utf-8') as file:
             botlist = json.load(file)['bots']
         return botlist
 
@@ -47,6 +45,35 @@ class Server(BaseHTTPRequestHandler):
         
         with open("database.json", 'w', encoding='utf-8') as file:
             json.dump(dic, file, indent = 2)
+
+    def save_client(self, email, data):
+        with open("database.json", encoding='utf-8') as file:
+            dic = json.load(file)
+        
+        if dic['clients'].get(email): 
+            dic['clients'][email]["licenses"].update(
+                data["licenses"])
+        else: 
+            dic['clients'][email] = data
+        
+        with open("database.json", 'w', 
+            encoding='utf-8') as file:
+            json.dump(dic, file, indent = 2)
+
+    def delete_seller(self, email):
+        with open("database.json", encoding='utf-8') as file:
+            dic = json.load(file)
+        del dic['sellers'][email]
+        with open("database.json", 'w', encoding='utf-8') as file:
+            json.dump(dic, file, indent = 2)
+
+    def delete_client(self, email):
+        with open("database.json", encoding='utf-8') as file:
+            dic = json.load(file)
+        del dic['clients'][email]
+        with open("database.json", 'w', encoding='utf-8') as file:
+            json.dump(dic, file, indent = 2)
+
 
     def get_path(self):
         texto = unquote(self.path)
@@ -94,6 +121,23 @@ class Server(BaseHTTPRequestHandler):
             self.sellers(post_data)
         elif self.path == "/clients":
             self.add_client(post_data)
+        elif self.path == "/licenses":
+            self.give_license(post_data)
+
+    def do_DELETE(self):
+        self._set_headers(200)
+        content_length = int(self.headers['Content-Length'])
+        delete_data = json.loads(
+            self.rfile.read(content_length
+        ).decode("utf-8"))
+        if self.path == "/clients":
+            email = delete_data["email"]
+            if self.get_clients(email):
+                self.delete_client(email)
+        elif self.path == "/sellers":
+            email = delete_data["email"]
+            if self.get_sellers(email):
+                self.delete_seller(email)
 
     def login(self, email, password):
         password = hashlib.md5(
@@ -118,6 +162,8 @@ class Server(BaseHTTPRequestHandler):
             email = data.pop('email')
             data['type'] = "seller"
             data['licenses'] = int(data['licenses'])
+            data['tests'] = int(data['licenses']) * 2
+            data['show'] = data['show']
             self.save_seller(email, data)
         else:
             data = self.get_sellers()
@@ -131,15 +177,46 @@ class Server(BaseHTTPRequestHandler):
                 data["bot"]: 0
             }
         }
-        self.wfile.write(self._json(bots))
+        self.save_client(email, data)
+        self.wfile.write(self._json(data))
 
     def search_clients(self, email, bot):
-        clients = self.get_clients()
-        bots = {}
-        for name, info in clients.items():
+        client_list = self.get_clients()
+        clients = {}
+        for name, info in client_list.items():
             if info["seller"] == email and bot in info["licenses"]:
-                bots[name] = info
-        self.wfile.write(self._json(bots))
+                info['licenses'][bot] = timedelta(
+                    seconds = info['licenses'][bot] - time.time()
+                ).days
+                clients[name] = info
+        self.wfile.write(self._json(clients))
+
+    def give_license(self, data):
+        seller = self.get_sellers(data["seller"])
+        if data["free"] and seller["tests"] > 0:
+            client = { "licenses": { 
+                data["bot"]: time.time() + 86400 * 3
+            }}
+            seller["tests"] -= 1
+        elif seller["licenses"] > 0:
+            client = { "licenses": { 
+                data["bot"]: time.time() + 86400 * 31
+            }}
+            seller["licenses"] -= 1
+        else: client = {}
+        if client:
+            self.save_seller(data['seller'], seller)
+            self.save_client(data["client"], client)
+            timestamp = client['licenses'][data['bot']]
+        else:
+            timestamp = time.time()
+        self.wfile.write(self._json({
+            "licenses": seller["licenses"],
+            "tests": seller["tests"], 
+            "time": timedelta(
+                seconds = timestamp - time.time()
+            ).days
+        }))
 
     def not_found(self):
         self._set_headers(404)

@@ -34,6 +34,9 @@ header button {
     opacity: 0;
     cursor: pointer;
 }
+header button:disabled {
+    cursor: auto;
+}
 header img {
     width: 5em;
     margin: -10px;
@@ -56,4 +59,10 @@ section.dashboard {
 }
 section.dashboard h2 {
     margin-bottom: 0.5em;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    margin: 1em;
 }

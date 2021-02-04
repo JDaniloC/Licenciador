@@ -1,20 +1,20 @@
-const sellers = {};
-
 function searchSeller(email, data) {
     if (sellers.hasOwnProperty(email)) {
         sellers[email].licenses = data.licenses;
         sellers[email].botlist = data.botlist;
+        sellers[email].show = data.show;
     } else {
         sellers[email] = { 
             licenses: data.licenses, 
-            botlist: data.botlist 
+            botlist: data.botlist,
+            show: data.show 
         };
         addSeller(email);
     }
 }
 function loadSellersPage() {
     $.ajax({
-        url: "http://localhost:8000" + '/sellers',
+        url: BASEURL + '/sellers',
         method: 'GET',
         success: function(response) {
             Object.keys(response).forEach(email => {
@@ -25,7 +25,7 @@ function loadSellersPage() {
         }
     });
     $.ajax({
-        url: "http://localhost:8000" + '/bots',
+        url: BASEURL + '/bots',
         method: 'GET',
         success: function(response) {
             Object.keys(response).forEach(botname => {
@@ -41,35 +41,74 @@ function saveSeller(event) {
         "input#selleremail")
     const licensesInput = document.querySelector(
         "input#licensedays")
+    const showInput = document.querySelector(
+        "input#show")
     const email = emailInput.value;
     const licenses = licensesInput.value;
+    const show = showInput.checked;
 
     const botlist = [];
     document.querySelectorAll(
-        "input[type=checkbox]:checked"
+        ".bot-selection input[type=checkbox]:checked"
     ).forEach(input => {
         botlist.push(input.id);
         input.checked = false;
     });
     $.ajax({
-        url: "http://localhost:8000" + '/sellers',
+        url: BASEURL + '/sellers',
         type: 'POST',
-        data: JSON.stringify({ email, licenses, botlist }),
-        success: function(data) {searchSeller(email, data)}
+        data: JSON.stringify({ email, licenses, botlist, show }),
+        success: function(data) {
+            searchSeller(email, data)
+        }
     })
     emailInput.value = "";
     licensesInput.value = "";
+    showInput.value = false;
+    return false;
+}
+
+function deleteSeller(event) {
+    event.preventDefault();
+    const email = document.querySelector(
+        "input#selleremail").value;
+    if (!email) {
+        return false;
+    }
+    $.ajax({
+        url: BASEURL + '/sellers',
+        type: 'DELETE',
+        data: JSON.stringify({ email }),
+        success: function() {
+            location.reload()
+        }
+    })
     return false;
 }
 
 function selectSeller(select) {
+    let email, licenses, bots, checked;
+    if (!select.value) {
+        bots = [];
+        email = "";
+        licenses = "";
+        checked = false;
+    } else {
+        email = select.value
+        bots = sellers[select.value].botlist
+        checked = sellers[select.value].show
+        licenses = sellers[select.value].licenses
+    }
     document.querySelector(
         "input#selleremail"
-    ).value = select.value;
+    ).value = email;
     document.querySelector(
         "input#licensedays"
-    ).value = sellers[select.value].licenses;
-    selectBots(sellers[select.value].botlist);
+    ).value = licenses;
+    document.querySelector(
+        "#show"
+    ).checked = checked;
+    selectBots(bots);
 }
 function selectBots(list) {
     document.querySelectorAll(

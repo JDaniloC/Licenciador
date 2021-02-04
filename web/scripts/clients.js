@@ -1,10 +1,8 @@
-const clients = {};
-
 function loadClientsPage() {
     const account = JSON.parse(localStorage.getItem('account'));
     const bot = localStorage.getItem('bot')
     $.ajax({
-        url: "http://localhost:8000" + '/clients',
+        url: BASEURL + '/clients',
         method: 'GET',
         data: { email: account.email, bot },
         success: function(response) {
@@ -16,22 +14,42 @@ function loadClientsPage() {
     });
 }
 
-function saveClients(form) {
+function saveClients() {
     const account = JSON.parse(
         localStorage.getItem('account'));
-    const email = form.querySelector("input[type=email]");
+    const email = document.querySelector(
+        "#newclient");
     $.ajax({
-        url: "http://localhost:8000" + '/clients',
-        method: 'POST',
-        data: { 
+        url: BASEURL + '/clients',
+        type: 'POST',
+        data: JSON.stringify({ 
             seller: account.email, 
-            client: email 
-        },
+            client: email.value,
+            bot: localStorage.getItem('bot')
+        }),
         success: function(response) {
-            clients[email] = response;
-            addClient(email);
+            clients[email.value] = response;
+            addClient(email.value);
+            email.value = '';
         }
     });
+    return false;
+}
+
+function deleteUser() {
+    const email = document.querySelector(
+        "input#emailpreview").value;
+    if (!email) {
+        return false;
+    }
+    $.ajax({
+        url: BASEURL + '/clients',
+        type: 'DELETE',
+        data: JSON.stringify({ email }),
+        success: function() {
+            location.reload()
+        }
+    })
     return false;
 }
 
@@ -57,6 +75,46 @@ function selectClient(dropdown) {
         email.value = "";
         licenses.value = "";
     }
+}
+
+function giveLicense(free = false) {
+    const client = document.querySelector(
+        "#emailpreview").value;
+    if (!client) {
+        return false;
+    }
+
+    const account = JSON.parse(
+        localStorage.getItem('account')); 
+    const bot = localStorage.getItem('bot')
+    $.ajax({
+        url: BASEURL + '/licenses',
+        type: 'POST',
+        data: JSON.stringify({ 
+            seller: account.email, 
+            client, free, bot
+        }),
+        success: function(response) {
+            let account = JSON.parse(localStorage.getItem('account'))
+            account['licenses'] = response.licenses
+            account['tests'] = response.tests
+            clients[client].licenses[bot] = response.time;
+            document.querySelector(
+                "#licensedayspreview"
+            ).value = response.time;
+            localStorage.setItem("account", JSON.stringify(account))
+            if (free) {
+                document.querySelector(
+                    "p#testNumber"
+                ).textContent = response.tests
+            } else {
+                document.querySelector(
+                    "p#licenseNumber"
+                ).textContent = response.licenses
+            }
+        }
+    });
+    return false;
 }
 
 loadClientsPage();
