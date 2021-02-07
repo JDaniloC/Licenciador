@@ -13,6 +13,7 @@ function loadBotlist() {
 
 function selectBot(bot) {
     localStorage.setItem("bot", bot.id)
+    localStorage.setItem("botname", bot.title)
     let button = document.querySelector(
         "header button"
     )
@@ -33,6 +34,7 @@ function addBot(bot) {
         }
     }
     button.id = bot.name;
+    button.setAttribute("title", bot.title)
     button.addEventListener('click', () => selectBot(button));
     button.innerHTML = `
     <h2> ${bot.title} </h2>

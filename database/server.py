@@ -1,6 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import unquote
 from datetime import timedelta
+from database import DATABASE
 import json, hashlib, time
 
 class Server(BaseHTTPRequestHandler):
@@ -15,65 +16,9 @@ class Server(BaseHTTPRequestHandler):
     def do_HEAD(self):
         self._set_headers()
     
-    def _json(self, data):
+    def _send_response(self, data):
         content = json.dumps(data)
-        return content.encode("utf-8")
-    
-    def get_sellers(self, email = None):
-        with open("database.json", encoding='utf-8') as file:
-            dic = json.load(file)['sellers']
-        return dic if email is None else dic.get(email)
-    
-    def get_clients(self, email = None):
-        with open("database.json", encoding='utf-8') as file:
-            dic = json.load(file)['clients']
-        return dic if email is None else dic.get(email)
-
-    def get_bots(self):
-        with open("database.json", encoding='utf-8') as file:
-            botlist = json.load(file)['bots']
-        return botlist
-
-    def save_seller(self, email, user):
-        with open("database.json", encoding='utf-8') as file:
-            dic = json.load(file)
-        
-        if dic['sellers'].get(email): 
-            dic['sellers'][email].update(user)
-        else: 
-            dic['sellers'][email] = user
-        
-        with open("database.json", 'w', encoding='utf-8') as file:
-            json.dump(dic, file, indent = 2)
-
-    def save_client(self, email, data):
-        with open("database.json", encoding='utf-8') as file:
-            dic = json.load(file)
-        
-        if dic['clients'].get(email): 
-            dic['clients'][email]["licenses"].update(
-                data["licenses"])
-        else: 
-            dic['clients'][email] = data
-        
-        with open("database.json", 'w', 
-            encoding='utf-8') as file:
-            json.dump(dic, file, indent = 2)
-
-    def delete_seller(self, email):
-        with open("database.json", encoding='utf-8') as file:
-            dic = json.load(file)
-        del dic['sellers'][email]
-        with open("database.json", 'w', encoding='utf-8') as file:
-            json.dump(dic, file, indent = 2)
-
-    def delete_client(self, email):
-        with open("database.json", encoding='utf-8') as file:
-            dic = json.load(file)
-        del dic['clients'][email]
-        with open("database.json", 'w', encoding='utf-8') as file:
-            json.dump(dic, file, indent = 2)
-
+        self.wfile.write(content.encode("utf-8"))
 
     def get_path(self):
         texto = unquote(self.path)
@@ -88,21 +33,28 @@ class Server(BaseHTTPRequestHandler):
         except: path, dic = self.path, {}
         return path, dic
 
+    def get_request_data(self):
+        content_length = int(self.headers['Content-Length'])
+        data = json.loads(
+            self.rfile.read(content_length
+        ).decode("utf-8"))
+        return data
+
     def do_GET(self):
         '''
         Routes to GET method
         '''
         self._set_headers(200)
         path, query = self.get_path()
+        email = query.get('email')
         if path == "/login":
-            self.login(query['email'], query['password'])
+            self.login(email, query['password'])
         elif path == "/bots":
-            self.wfile.write(self._json(self.get_bots()))
-        elif path == "/sellers":
-            self.sellers()
+            self._send_response(DATABASE.get_bots())
+        elif path == "/sellers" and DATABASE.is_admin(email):
+            self._send_response(DATABASE.get_sellers())
         elif path == "/clients":
-            self.search_clients(
-                query["email"], query["bot"])
+            self.search_clients(email, query["bot"])
         else:
             self.not_found() 
 
@@ -111,14 +63,11 @@ class Server(BaseHTTPRequestHandler):
         Routes to POST method
         '''
         self._set_headers(200)
-        content_length = int(self.headers['Content-Length'])
-        post_data = json.loads(
-            self.rfile.read(content_length
-        ).decode("utf-8"))
+        post_data = self.get_request_data()
         if self.path == '/login':
             self.login(post_data['email'], post_data['password'])
         elif self.path == "/sellers":
-            self.sellers(post_data)
+            self.add_seller(post_data)
         elif self.path == "/clients":
             self.add_client(post_data)
         elif self.path == "/licenses":
@@ -126,48 +75,43 @@ class Server(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         self._set_headers(200)
-        content_length = int(self.headers['Content-Length'])
-        delete_data = json.loads(
-            self.rfile.read(content_length
-        ).decode("utf-8"))
+        delete_data = self.get_request_data()
         if self.path == "/clients":
             email = delete_data["email"]
-            if self.get_clients(email):
-                self.delete_client(email)
+            if DATABASE.get_clients(email):
+                DATABASE.delete_client(email)
         elif self.path == "/sellers":
             email = delete_data["email"]
-            if self.get_sellers(email):
-                self.delete_seller(email)
+            if DATABASE.get_sellers(email):
+                DATABASE.delete_seller(email)
 
     def login(self, email, password):
         password = hashlib.md5(
             password.encode("utf-8")
         ).hexdigest()
-        
-        conta = self.get_sellers(email)
+
+        conta = DATABASE.get_sellers(email)
         result = {}
         if conta:
             secret = conta.get('password')
             if not secret:
                 conta['password'] = password
-                self.save_seller(email, conta)
+                DATABASE.save_seller(email, conta)
             conta['email'] = email
             del conta['password']
             result = conta
+        
+        self._send_response(result)
 
-        self.wfile.write(self._json(result))
-    
-    def sellers(self, data = None):
-        if data:
+    def add_seller(self, data = None):
+        if data and DATABASE.is_admin(data["admin"]):
             email = data.pop('email')
             data['type'] = "seller"
             data['licenses'] = int(data['licenses'])
             data['tests'] = int(data['licenses']) * 2
             data['show'] = data['show']
-            self.save_seller(email, data)
-        else:
-            data = self.get_sellers()
-        self.wfile.write(self._json(data))
+            DATABASE.save_seller(email, data)
+        self._send_response(data)
 
     def add_client(self, data):
         email = data["client"]
@@ -177,11 +121,11 @@ class Server(BaseHTTPRequestHandler):
                 data["bot"]: 0
             }
         }
-        self.save_client(email, data)
-        self.wfile.write(self._json(data))
+        DATABASE.save_client(email, data)
+        self._send_response(data)
 
     def search_clients(self, email, bot):
-        client_list = self.get_clients()
+        client_list = DATABASE.get_clients()
         clients = {}
         for name, info in client_list.items():
             if info["seller"] == email and bot in info["licenses"]:
@@ -189,45 +133,53 @@ class Server(BaseHTTPRequestHandler):
                     seconds = info['licenses'][bot] - time.time()
                 ).days
                 clients[name] = info
-        self.wfile.write(self._json(clients))
+        self._send_response(clients)
 
     def give_license(self, data):
-        seller = self.get_sellers(data["seller"])
-        if data["free"] and seller["tests"] > 0:
-            client = { "licenses": { 
-                data["bot"]: time.time() + 86400 * 3
-            }}
-            seller["tests"] -= 1
-        elif seller["licenses"] > 0:
-            client = { "licenses": { 
-                data["bot"]: time.time() + 86400 * 31
-            }}
-            seller["licenses"] -= 1
-        else: client = {}
-        if client:
-            self.save_seller(data['seller'], seller)
-            self.save_client(data["client"], client)
-            timestamp = client['licenses'][data['bot']]
+        seller = DATABASE.get_sellers(data["seller"])
+        bot = data["bot"]
+        if bot not in seller["botlist"]:
+            self._set_headers(401)
+            time_days = 0
         else:
-            timestamp = time.time()
-        self.wfile.write(self._json({
+            now = time.time()
+            if data["free"] and seller["tests"] > 0:
+                client = { "licenses": { 
+                    bot: now + 86400 * 3
+                }}
+                seller["tests"] -= 1
+            elif seller["licenses"] > 0:
+                client = { "licenses": { 
+                    bot: now + 86400 * 31
+                }}
+                seller["licenses"] -= 1
+            else: client = {}
+            if client:
+                DATABASE.save_seller(data["seller"], seller)
+                DATABASE.save_client(data["client"], client)
+                timestamp = client['licenses'][data['bot']]
+            else:
+                timestamp = now
+            time_days = timedelta(
+                seconds = timestamp - now
+            ).days
+        self._send_response({
             "licenses": seller["licenses"],
             "tests": seller["tests"], 
-            "time": timedelta(
-                seconds = timestamp - time.time()
-            ).days
-        }))
+            "time": time_days
+        })
 
     def not_found(self):
         self._set_headers(404)
-        self.wfile.write(self._json({
+        self._send_response({
             "error": "Not Found page"
-        }))
+        })
 
     def do_OPTIONS(self):           
         self._set_headers(201)
 
-def run(server_class=HTTPServer, handler_class=Server, addr="localhost", port=8000):
+def run(server_class=HTTPServer, handler_class=Server, 
+    addr="localhost", port=8000):
     server_address = (addr, port)
     httpd = server_class(server_address, handler_class)
 

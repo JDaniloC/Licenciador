@@ -13,9 +13,11 @@ function searchSeller(email, data) {
     }
 }
 function loadSellersPage() {
+    let account = JSON.parse(localStorage.getItem('account'));
     $.ajax({
         url: BASEURL + '/sellers',
         method: 'GET',
+        data: { email: account.email },
         success: function(response) {
             Object.keys(response).forEach(email => {
                 if (response[email].type === "seller") {
@@ -43,11 +45,12 @@ function saveSeller(event) {
         "input#licensedays")
     const showInput = document.querySelector(
         "input#show")
+    const admin = JSON.parse(localStorage.getItem('account')).email;
     const email = emailInput.value;
     const licenses = licensesInput.value;
     const show = showInput.checked;
-
     const botlist = [];
+
     document.querySelectorAll(
         ".bot-selection input[type=checkbox]:checked"
     ).forEach(input => {
@@ -57,7 +60,9 @@ function saveSeller(event) {
     $.ajax({
         url: BASEURL + '/sellers',
         type: 'POST',
-        data: JSON.stringify({ email, licenses, botlist, show }),
+        data: JSON.stringify({ 
+            email, admin, licenses, botlist, show 
+        }),
         success: function(data) {
             searchSeller(email, data)
         }

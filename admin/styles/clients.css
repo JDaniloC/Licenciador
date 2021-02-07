@@ -36,3 +36,9 @@ section.client-settings form div {
     display: flex;
     padding: 0;
 }
+h2.bot-name {
+    background-color: #ffffcb;
+    border-left: 6px solid #ffe600;
+    padding: 20px;
+    width: 100%;
+}

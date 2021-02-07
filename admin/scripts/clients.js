@@ -1,6 +1,8 @@
 function loadClientsPage() {
     const account = JSON.parse(localStorage.getItem('account'));
     const bot = localStorage.getItem('bot')
+    document.querySelector("h2.bot-name"
+        ).textContent = localStorage.getItem('botname')
     $.ajax({
         url: BASEURL + '/clients',
         method: 'GET',
