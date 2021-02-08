@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="styles/sellers.css">
     <link rel="stylesheet" href="styles/botlist.css">
     <link rel="stylesheet" href="styles/clients.css">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
-    </script> 
+    <script src="scripts/jquery.js"></script> 
     <script type = "text/javascript" src = "scripts/login.js"></script>
     
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -54,7 +53,7 @@
 <script>
     const clients = {};
     const sellers = {};
-    const BASEURL = "http://localhost:8000"
+    const BASEURL = "http://34.73.67.212:8000"
     function backToBotlist() {
         $("main").load("views/botlist.html");
         let button = document.querySelector(
