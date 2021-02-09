@@ -133,6 +133,10 @@ class Server(BaseHTTPRequestHandler):
                     seconds = info['licenses'][bot] - time.time()
                 ).days
                 clients[name] = info
+            elif name == email and bot in info["licenses"]:
+                clients[name] = {
+                    "timestamp": info['licenses'][bot]
+                }
         self._send_response(clients)
 
     def give_license(self, data):
