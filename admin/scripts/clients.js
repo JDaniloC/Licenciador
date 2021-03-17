@@ -6,7 +6,7 @@ function loadClientsPage() {
     $.ajax({
         url: BASEURL + '/clients',
         method: 'GET',
-        data: { email: account.email, bot },
+        data: { email: account.email, bot }, 
         success: function(response) {
             Object.keys(response).forEach(email => {
                 clients[email] = response[email];
@@ -29,6 +29,7 @@ function saveClients() {
             client: email.value,
             bot: localStorage.getItem('bot')
         }),
+        contentType: "application/json; charset=utf-8",
         success: function(response) {
             clients[email.value] = response;
             addClient(email.value);
@@ -48,6 +49,7 @@ function deleteUser() {
         url: BASEURL + '/clients',
         type: 'DELETE',
         data: JSON.stringify({ email }),
+        contentType: "application/json; charset=utf-8",
         success: function() {
             location.reload()
         }
@@ -79,7 +81,7 @@ function selectClient(dropdown) {
     }
 }
 
-function giveLicense(free = false) {
+function giveLicense(isTest = false) {
     const client = document.querySelector(
         "#emailpreview").value;
     if (!client) {
@@ -94,8 +96,9 @@ function giveLicense(free = false) {
         type: 'POST',
         data: JSON.stringify({ 
             seller: account.email, 
-            client, free, bot
+            client, isTest, bot
         }),
+        contentType: "application/json; charset=utf-8",
         success: function(response) {
             let account = JSON.parse(localStorage.getItem('account'))
             account['licenses'] = response.licenses
@@ -105,7 +108,7 @@ function giveLicense(free = false) {
                 "#licensedayspreview"
             ).value = response.time;
             localStorage.setItem("account", JSON.stringify(account))
-            if (free) {
+            if (isTest) {
                 document.querySelector(
                     "p#testNumber"
                 ).textContent = response.tests

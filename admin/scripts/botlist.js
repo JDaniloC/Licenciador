@@ -3,9 +3,8 @@ function loadBotlist() {
         url: BASEURL + '/bots',
         method: 'GET',
         success: function(response) {
-            Object.keys(response).forEach(botname => {
-                response[botname].name = botname;
-                addBot(response[botname]);
+            Object.keys(response).forEach(index => {
+                addBot(response[index]);
             });
         }
     });
@@ -39,7 +38,7 @@ function addBot(bot) {
     button.innerHTML = `
     <h2> ${bot.title} </h2>
     <div>
-        <img src="${bot.image}">
+        <img src="${bot.imageURL}">
     </div>
     `;
     document.querySelector(".bot-list").appendChild(button);

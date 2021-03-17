@@ -23,6 +23,7 @@ function login(form) {
         url: BASEURL + '/login', 
         type: 'POST',
         data: JSON.stringify({ email, password }),
+        contentType: "application/json; charset=utf-8",
         success: function(data) {
             if (data.type === undefined) {
                 shakeInput(emailInput);

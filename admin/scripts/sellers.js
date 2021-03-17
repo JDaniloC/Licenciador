@@ -19,9 +19,9 @@ function loadSellersPage() {
         method: 'GET',
         data: { email: account.email },
         success: function(response) {
-            Object.keys(response).forEach(email => {
-                if (response[email].type === "seller") {
-                    searchSeller(email, response[email]);
+            Object.keys(response).forEach(index => {
+                if (response[index].type === "seller") {
+                    searchSeller(response[index].email, response[index]);
                 }
             });
         }
@@ -30,9 +30,8 @@ function loadSellersPage() {
         url: BASEURL + '/bots',
         method: 'GET',
         success: function(response) {
-            Object.keys(response).forEach(botname => {
-                response[botname].name = botname;
-                addBot(response[botname]);
+            Object.keys(response).forEach(index => {
+                addBot(response[index]);
             });
         }
     });
@@ -60,6 +59,7 @@ function saveSeller(event) {
     $.ajax({
         url: BASEURL + '/sellers',
         type: 'POST',
+        contentType: "application/json; charset=utf-8",
         data: JSON.stringify({ 
             email, admin, licenses, botlist, show 
         }),
@@ -84,6 +84,7 @@ function deleteSeller(event) {
         url: BASEURL + '/sellers',
         type: 'DELETE',
         data: JSON.stringify({ email }),
+        contentType: "application/json; charset=utf-8",
         success: function() {
             location.reload()
         }
@@ -121,8 +122,11 @@ function selectBots(list) {
     ).forEach(input => {
         input.checked = false;
     })
-    list.forEach(bot => {
-        document.querySelector(`input#${bot}`).checked = true;
+    list.forEach(botName => {
+        const input = document.querySelector(`input#${botName}`)
+        if (input) {
+            input.checked = true;
+        }
     });
 }
 
@@ -142,7 +146,7 @@ function addBot(bot) {
     <span>
         <h3> ${bot.title} </h3>
         <div>
-            <img src="${bot.image}">
+            <img src="${bot.imageURL}">
         </div>
     </span>`
     document.querySelector(".bot-selection").appendChild(label);
