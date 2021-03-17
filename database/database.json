@@ -46,6 +46,11 @@
       "id": 8,
       "title": "Telebot",
       "image": "https://imagepng.org/wp-content/uploads/2017/11/telegram-icone-icon.png"
+    },
+    "chauk": {
+      "id": 9,
+      "title": "Chauk",
+      "image": "https://i.imgur.com/OvHCQSJ.png"
     }
   }
 }
