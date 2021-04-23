@@ -1,4 +1,5 @@
 const Sellers = require('../models/Seller'); 
+const History = require('./History');
 
 module.exports = {
     async index(request, response) {
@@ -25,9 +26,9 @@ module.exports = {
         if (!seller) { 
             seller = await Sellers.create({
                 email: sellerEmail,
-                tests: licenses * 2,
+                tests: licenses,
                 type: "seller",
-                licenses,
+                licenses: 0,
                 botlist,
                 show,
             })
@@ -41,22 +42,29 @@ module.exports = {
             seller = await Sellers.findOneAndUpdate(
                 {email: sellerEmail},
                 {
-                    licenses, 
-                    tests: licenses * 2, 
+                    tests: licenses, 
                     botlist, 
                     show
                 })  
             seller.botlist = botlist;
         }
         seller.password = "";
+        History.store(creatorEmail, `Create/Update ${sellerEmail} seller.`)
         return response.json(seller);
     },
 
     async destroy(request, response) {
-        const {email} = request.body;
-        // This need to be a JWT token
+        const { email, creatorEmail } = request.body;
+        // This need to be a JWT token/
+        const creator = await Sellers.findOne({ email: creatorEmail });
+
+        if (!creator || creator.type !== "admin") {
+            return response.json({});
+        }
 
         const seller = await Sellers.findOneAndDelete({email});
+
+        History.store(creatorEmail, `Deleted ${email} seller.`)
         return response.json(seller);
     },
 

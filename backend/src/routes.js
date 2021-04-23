@@ -4,6 +4,7 @@ const Bots = require('./controllers/Bots');
 const Sellers = require('./controllers/Sellers');
 const Login = require('./controllers/Session');
 const Licensor = require('./controllers/Licensor');
+const Histories = require('./controllers/History');
 
 const routes = Router();
 
@@ -25,6 +26,7 @@ routes.delete('/sellers', Sellers.destroy);
 routes.post('/login', Login.store);
 routes.post('/licenses', Licensor.store);
 
-//Você tirou um elemento do express que foi o router, onde ela contêm o post, delete, put, get.
+routes.get('/history', Histories.index);
+routes.delete('/histories', Histories.delete);
 
 module.exports = routes;

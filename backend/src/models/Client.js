@@ -4,6 +4,7 @@ const ClientSchema = new mongoose.Schema({
     email: String,
     seller: String,
     license: Array,
+    updateTime: Date
 });
 
 module.exports = mongoose.model('Client', ClientSchema); //Client é o nome e ClientSchema é o parâmetro.

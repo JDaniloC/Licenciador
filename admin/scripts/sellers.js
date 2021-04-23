@@ -75,6 +75,7 @@ function saveSeller(event) {
 
 function deleteSeller(event) {
     event.preventDefault();
+    const admin = JSON.parse(localStorage.getItem('account')).email;
     const email = document.querySelector(
         "input#selleremail").value;
     if (!email) {
@@ -83,7 +84,7 @@ function deleteSeller(event) {
     $.ajax({
         url: BASEURL + '/sellers',
         type: 'DELETE',
-        data: JSON.stringify({ email }),
+        data: JSON.stringify({ email, creatorEmail: admin }),
         contentType: "application/json; charset=utf-8",
         success: function() {
             location.reload()

@@ -1,5 +1,6 @@
 const Clients = require('../models/Client');
 const Sellers = require('../models/Seller'); 
+const History = require('./History');
 
 module.exports = {
 
@@ -32,9 +33,9 @@ module.exports = {
         if (isTest && seller.tests > 0) {
             result.tests -= 1;
             daysToAdd = 3;
-        } else if (!isTest && seller.licenses > 0){
+        } else if (!isTest){
             daysToAdd = 31;
-            result.licenses -= 1;
+            result.licenses += 1;
         }
 
         let foundBot = false;
@@ -59,7 +60,9 @@ module.exports = {
                 tests: result.tests
             });
         await Clients.findOneAndUpdate(
-            {email: clientEmail}, {license: licenses})
+            {email: clientEmail}, {license: licenses})            
+        
+        History.store(sellerEmail, `Added ${daysToAdd} days to ${clientEmail}.`)
         return response.json(result);
     }
 }

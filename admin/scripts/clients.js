@@ -40,6 +40,8 @@ function saveClients() {
 }
 
 function deleteUser() {
+    const account = JSON.parse(
+        localStorage.getItem('account'));
     const email = document.querySelector(
         "input#emailpreview").value;
     if (!email) {
@@ -48,7 +50,7 @@ function deleteUser() {
     $.ajax({
         url: BASEURL + '/clients',
         type: 'DELETE',
-        data: JSON.stringify({ email }),
+        data: JSON.stringify({ seller: account.email, email }),
         contentType: "application/json; charset=utf-8",
         success: function() {
             location.reload()

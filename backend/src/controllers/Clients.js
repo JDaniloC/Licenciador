@@ -1,4 +1,5 @@
 const Client = require('../models/Client');
+const History = require('./History');
 
 module.exports = {
 
@@ -50,15 +51,19 @@ module.exports = {
         }
 
         let client = await Client.findOne({ email: clientEmail }); 
+        const today = new Date().getTime();
+
         if (!client) { 
             client = await Client.create({
                 email: clientEmail,
                 seller: sellerEmail,
                 license: [{
                     botname: botName,
+                    updateTime: today, 
                     timestamp: 0
                 }],
             });
+            History.store(sellerEmail, `Created the ${clientEmail} client.`)
         } else {
             let licenses = client.license;
             let hasLicense = licenses.filter(license => license.botname === botName)
@@ -70,12 +75,15 @@ module.exports = {
             };
             await Client.updateOne({email: clientEmail}, {
                 seller: sellerEmail,
+                updateTime: today, 
                 license: licenses
             });
+            History.store(sellerEmail, `Updated the ${clientEmail} client.`)
         }
 
         return response.json({
             seller: sellerEmail,
+            since: today,
             licenses: {
                 [botName]: 0
             }
@@ -83,17 +91,22 @@ module.exports = {
     },
 
     async update(request, response) {
-        const {license } = request.body; 
-        let atualizar = await Client.findOneAndUpdate(
-            { client:license });
-        return response.json(atualizar)
+        // const { license } = request.body; 
+        // let atualizar = await Client.findOneAndUpdate(
+        //    { client:license });
+        // return response.json(atualizar)
     },
 
     async destroy(request, response) {
-        const { email } = request.body;
-
+        const { seller, email } = request.body;
         // Needs to use a JWT token (from seller)
-        let client = await Client.findOneAndDelete({ email });
+
+        let client = await Client.findOne({ email }); 
+        if (client.seller === seller) {
+            await Client.findOneAndDelete({ email });
+
+            History.store(seller, `Deleted the ${email} client.`)
+        }
         return response.json(client);
     }
 }
