@@ -49,7 +49,7 @@ module.exports = {
             seller.botlist = botlist;
         }
         seller.password = "";
-        History.store(creatorEmail, `Create/Update ${sellerEmail} seller.`)
+        History.store(creatorEmail, `Created/Updated ${sellerEmail} seller.`)
         return response.json(seller);
     },
 

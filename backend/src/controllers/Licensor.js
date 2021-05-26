@@ -62,7 +62,9 @@ module.exports = {
         await Clients.findOneAndUpdate(
             {email: clientEmail}, {license: licenses})            
         
-        History.store(sellerEmail, `Added ${daysToAdd} days to ${clientEmail}.`)
+        if (daysToAdd > 0) {
+            History.store(sellerEmail, `Added ${daysToAdd} days to ${clientEmail}.`)
+        }
         return response.json(result);
     }
 }

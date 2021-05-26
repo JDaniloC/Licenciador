@@ -1,4 +1,5 @@
 const Client = require('../models/Client');
+const Sellers = require('../models/Seller'); 
 const History = require('./History');
 
 module.exports = {
@@ -72,13 +73,16 @@ module.exports = {
                     botname: botName,
                     timestamp: 0
                 });
+                History.store(sellerEmail, `Add ${botName} to ${clientEmail} client.`)
             };
             await Client.updateOne({email: clientEmail}, {
                 seller: sellerEmail,
                 updateTime: today, 
                 license: licenses
             });
-            History.store(sellerEmail, `Updated the ${clientEmail} client.`)
+            if (client.seller !== sellerEmail) {
+                History.store(sellerEmail, `Changed Seller from ${client.seller} of ${clientEmail} client.`)
+            }
         }
 
         return response.json({
@@ -103,6 +107,15 @@ module.exports = {
 
         let client = await Client.findOne({ email }); 
         if (client.seller === seller) {
+            if (client.license.filter((license) => {
+                const now = new Date();
+                const before = new Date(license.timestamp);
+                return ((now - before) / (1000 * 60 * 60 * 24)) > 7
+            }).length == 0) {
+                await Seller.findOneAndUpdate({ email: seller },
+                    {$inc: { licenses: -1 }})
+            }
+
             await Client.findOneAndDelete({ email });
 
             History.store(seller, `Deleted the ${email} client.`)
