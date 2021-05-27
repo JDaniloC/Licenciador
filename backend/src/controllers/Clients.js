@@ -109,10 +109,10 @@ module.exports = {
         if (client.seller === seller) {
             if (client.license.filter((license) => {
                 const now = new Date();
-                const before = new Date(license.timestamp);
+                const before = new Date(license.updateTime);
                 return ((now - before) / (1000 * 60 * 60 * 24)) > 7
             }).length == 0) {
-                await Seller.findOneAndUpdate({ email: seller },
+                await Sellers.findOneAndUpdate({ email: seller },
                     {$inc: { licenses: -1 }})
             }
 
