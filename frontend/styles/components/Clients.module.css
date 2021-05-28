@@ -1,0 +1,44 @@
+.clients {
+    display: flex;
+    flex-direction: column;
+}
+.clients div {
+    margin: 1em;
+}
+.clients select {
+    padding: 1em;
+    width: 100%;
+}
+.clients form {
+    display: flex;
+    flex-direction: column;
+    width: 20em;
+}
+.clients form * {
+    padding: 1em;
+}
+.clientSettings {
+    margin: 1em;
+}
+.clientSettings form {
+    display: flex;
+    flex-direction: column;
+    width: 25em;
+}
+
+.clientSettings form * {
+    text-align: center;
+    padding: 1em;
+    flex: 1;
+}
+.clientSettings form div {
+    display: flex;
+    padding: 0;
+}
+.botName {
+    background-color: #ffffcb;
+    border-left: 6px solid #ffe600;
+    padding: 20px;
+    width: 100%;
+    margin-top: 0;
+}

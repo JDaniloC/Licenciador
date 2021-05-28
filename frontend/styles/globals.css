@@ -21,3 +21,13 @@ span.overlay {
   background-color: #000;
   opacity: 0.7;
 }
+.dashboard {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.dashboard h2 {
+  margin-bottom: 0.5em;
+}

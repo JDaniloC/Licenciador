@@ -1,16 +1,23 @@
+import { useContext } from 'react';
+import { HeaderContext } from '../contexts/Header.context';
+import { RouterContext} from '../contexts/Router.context';
 import styles from '../styles/components/Header.module.css';
 
-export default function Header({ licenses, tests, changeDisplay }) {
+export default function Header() {
+    const { changeDisplay, licenses, tests, canBack } = useContext(HeaderContext);
+    const { setRoute } = useContext(RouterContext);
 
     function closeAccount() {
         localStorage.removeItem('account');
         localStorage.removeItem('bot');
+        setRoute("login");
         changeDisplay("flex");
     }
     
     return (
         <header className = {styles.header}>
-            <button onClick = {() => {}} disabled>
+            <button onClick = {() => {setRoute("botList")}} disabled = {!canBack}
+                style = {{ opacity: (canBack) ? 1 : 0 }}>
                 <img src="https://img.icons8.com/clouds/344/back.png" alt="back Img"/>
             </button>
             <h1> Licenciador </h1>

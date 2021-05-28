@@ -102,8 +102,12 @@ module.exports = {
     },
 
     async destroy(request, response) {
-        const { seller, email } = request.body;
+        const { seller, email } = request.query;
         // Needs to use a JWT token (from seller)
+
+        if (!seller || !email) {
+            return response.json({ "error": "Missing params." });
+        }
 
         let client = await Client.findOne({ email }); 
         if (client.seller === seller) {

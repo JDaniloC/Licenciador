@@ -5,9 +5,9 @@ const History = require('./History');
 module.exports = {
 
     async store(request, response) {
-        const { seller: sellerEmail, 
-                client: clientEmail,
-                bot: botName, isTest,
+        const { sellerEmail, 
+            clientEmail,
+            botName, isTest,
         } = request.body;
         
         if (!sellerEmail || !clientEmail || !botName || 

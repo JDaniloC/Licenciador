@@ -1,0 +1,33 @@
+.botList {
+    text-align: center;
+    max-width: 70em;
+}
+.botList h1 {
+    margin: 1em;
+}
+.botList button {
+    background-color: transparent;
+    margin: 0.5em;
+    padding: 1em 2em;
+    border: solid 0.1px;
+    cursor: pointer;
+    border-radius: 2em;
+}
+.botList button div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10em;
+    overflow: hidden;
+    border-radius: 100%;
+}
+.botList button img {
+    height: 10em;
+}
+.botList button:hover {
+    color: white;
+    background-color: #777;
+}
+.botList button:disabled:hover {
+    background-color: #ddd;
+}

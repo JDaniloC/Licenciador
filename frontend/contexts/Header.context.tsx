@@ -3,13 +3,20 @@ import Header from '../components/Header';
 
 interface HeaderContextData {
     changeDisplay: (string:string) => void;
+    setCanBack: (option: boolean) => void;
     overlayDisplay: string;
     loginDisplay: string;
-
+    canBack: boolean;
+    
     setLicenses: (number:number) => void;
     setTests: (number:number) => void;
     licenses: number;
     tests: number;
+    
+    setBotTitle: (string:string) => void;
+    setBotName: (string:string) => void;
+    botTitle: string;
+    botName: string;
 }
 
 interface HeaderProviderProps {
@@ -27,6 +34,10 @@ export function HeaderProvider({
 
     const [licenses, setLicenses] = useState(0);
     const [tests, setTests] = useState(0);
+    const [canBack, setCanBack] = useState(false);
+
+    const [botTitle, setBotTitle] = useState("");
+    const [botName, setBotName] = useState("");
  
     function changeDisplay(style:string) {
         setOverlayDisplay(style);
@@ -36,14 +47,13 @@ export function HeaderProvider({
     return (
         <HeaderContext.Provider value = {{
             changeDisplay, overlayDisplay,
-            loginDisplay,
+            loginDisplay, canBack,
             setLicenses, setTests,
-            licenses, tests
+            licenses, tests,
+            setCanBack, botName,
+            setBotName, botTitle,
+            setBotTitle
         }}>
-            <Header tests = {tests}
-                licenses = {licenses}
-                changeDisplay = {changeDisplay}
-            /> 
             {children}
         </HeaderContext.Provider>
     )

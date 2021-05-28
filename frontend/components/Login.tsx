@@ -1,6 +1,7 @@
 import styles from '../styles/components/Login.module.css';
 import { HeaderContext } from '../contexts/Header.context';
-import { useContext, useRef, useState } from 'react';
+import { RouterContext } from '../contexts/Router.context';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
@@ -14,9 +15,19 @@ export default function Login() {
         overlayDisplay, loginDisplay,
         changeDisplay
     } = useContext(HeaderContext);
+    const {
+        setRoute
+    } = useContext(RouterContext);
+
     const emailRef = useRef();
     const passwordRef = useRef();
     
+    useEffect(() => {
+        if (localStorage.getItem("account")) {
+            removeLogin();
+        }
+    })
+
     function shakeInput(input: HTMLInputElement) {
         input.animate([   
             { transform: 'translateX(0px)' },
@@ -50,11 +61,11 @@ export default function Login() {
         
         
         if (account.type == "admin") {
-            // $("main").load("views/sellers.html");
+            setRoute("sellers");
         } else {
             setLicenses(account.licenses);
             setTests(account.tests);
-            // $("main").load("views/botlist.html");
+            setRoute("botList");
         }
     }
       

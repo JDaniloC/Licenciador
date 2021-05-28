@@ -1,10 +1,13 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
-import { GetServerSideProps } from 'next';
-import Login from '../components/Login';
 import { HeaderProvider } from '../contexts/Header.context';
+import { RouterProvider } from '../contexts/Router.context';
+import Header from '../components/Header';
+import { GetServerSideProps } from 'next';
+import { serverURL } from '../config';
+import axios from 'axios';
 
-export default function Home() {
+export default function Home({ bots }) {
   return (
     <div className={styles.container}>
       <Head>
@@ -12,15 +15,20 @@ export default function Home() {
       </Head>
 
       <HeaderProvider>
-        <Login/>
+        <RouterProvider bots = {bots}>
+          <Header/> 
+        </RouterProvider>
       </HeaderProvider>
     </div>
   )
 }
 
 export const getServerSideProps:GetServerSideProps = async (context) => {
-  // const response = await axios.get(serverURL + "/api/missions/")
+  const response = await axios.get(serverURL + "/bots/");
+
   return {
-    props: {}  
+    props: {
+        bots: response.data
+    }  
   }
 }
