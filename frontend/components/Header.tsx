@@ -4,7 +4,8 @@ import { RouterContext} from '../contexts/Router.context';
 import styles from '../styles/components/Header.module.css';
 
 export default function Header() {
-    const { changeDisplay, licenses, tests, canBack } = useContext(HeaderContext);
+    const { changeDisplay, setCanBack, 
+        licenses, tests, canBack } = useContext(HeaderContext);
     const { setRoute } = useContext(RouterContext);
 
     function closeAccount() {
@@ -16,7 +17,7 @@ export default function Header() {
     
     return (
         <header className = {styles.header}>
-            <button onClick = {() => {setRoute("botList")}} disabled = {!canBack}
+            <button onClick = {() => {setRoute("botList"); setCanBack(false) }} disabled = {!canBack}
                 style = {{ opacity: (canBack) ? 1 : 0 }}>
                 <img src="https://img.icons8.com/clouds/344/back.png" alt="back Img"/>
             </button>

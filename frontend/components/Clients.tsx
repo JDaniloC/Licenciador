@@ -1,9 +1,9 @@
 import styles from '../styles/components/Clients.module.css';
 import { HeaderContext } from '../contexts/Header.context';
 import { useContext, useEffect, useState } from 'react';
+import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
-import { serverURL } from '../config';
 
 export default function Clients() {
     const { botName, setTests, setLicenses } = useContext(HeaderContext);
@@ -85,7 +85,7 @@ export default function Clients() {
         if (!email) {
             return false;
         }
-        await axios.delete(serverURL + "/clients/", {
+        await axios.delete(serverURL + "/api/clients/", {
             params: {
                 seller: account.email, email
             }
