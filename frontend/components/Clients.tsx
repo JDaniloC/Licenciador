@@ -1,13 +1,11 @@
 import styles from '../styles/components/Clients.module.css';
 import { HeaderContext } from '../contexts/Header.context';
-import { RouterContext } from '../contexts/Router.context';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Head from 'next/head'
 import axios from 'axios';
 import { serverURL } from '../config';
 
 export default function Clients() {
-    const { setRoute } = useContext(RouterContext);
     const { botName, setTests, setLicenses } = useContext(HeaderContext);
 
     const [clients, setClients] = useState({});
@@ -24,7 +22,6 @@ export default function Clients() {
                 bot: botName
             }
         });
-
         const tempClients = {};
 
         Object.keys(data).forEach(email => {

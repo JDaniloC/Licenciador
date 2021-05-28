@@ -23,11 +23,16 @@ span.overlay {
 }
 .dashboard {
   display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  width: 100%;
-  flex-wrap: wrap;
+  justify-content: center;
+  flex-wrap: nowrap;
+  max-width: 900px;
 }
 .dashboard h2 {
   margin-bottom: 0.5em;
+}
+
+@media (max-width: 600px) {
+  .dashboard {
+    flex-wrap: wrap;
+  }
 }

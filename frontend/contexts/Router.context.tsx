@@ -1,7 +1,8 @@
-import React, { createContext, ReactNode, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useState } from 'react';
 import BotList from '../components/BotList';
 import Clients from '../components/Clients';
 import Login from '../components/Login';
+import Sellers from '../components/Sellers';
 
 interface RouterContextData {
     setRoute: (route:string) => void;
@@ -37,7 +38,9 @@ export function RouterProvider({
                 <BotList bots = { bots }/>
             : (route == "clients") ?
                 <Clients />
-            : <> </>}
+            : (route == "sellers") ?
+                <Sellers bots = { bots }/> 
+            :<> Rota não encontrada </>}
         </RouterContext.Provider>
     )
 }

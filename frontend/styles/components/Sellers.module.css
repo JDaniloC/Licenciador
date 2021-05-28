@@ -1,0 +1,75 @@
+.sellers {
+    display: flex;
+    flex-direction: column;
+}
+.sellers div {
+    margin: 1em;
+}
+.sellers select {
+    padding: 1em;
+    width: 100%;
+}
+.sellers form {
+    display: flex;
+    flex-direction: column;
+    width: 20em;
+}
+.sellers form * {
+    padding: 1em;
+}
+.botSelection {
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+}
+.botSelection h3 {
+    margin: 0;
+}
+.botSelection label {
+    display: flex;
+}
+.botSelection label input {
+    opacity: 0;
+}
+.botSelection span {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: transparent;
+    border-radius: 2em;
+    border: solid 0.1px;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    margin: 0.5em;
+    flex: 1;
+}
+.botSelection span div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 6em;
+    overflow: hidden;
+    border-radius: 100%;
+}
+.botSelection span img {
+    height: 6em;
+}
+.botSelection span:hover, 
+.botSelection input:checked + span{
+    color: white;
+    background-color: #777;
+}
+.botSelection input:checked + span:hover {
+    background-color: #555;
+}
+.showBots {
+    border: solid 0.1px #666;
+    border-radius: 2px;
+    margin: 0!important;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.showBots * {
+    padding: 0!important;
+}

@@ -23,12 +23,21 @@ export default function Home({ bots }) {
   )
 }
 
-export const getServerSideProps:GetServerSideProps = async (context) => {
-  const response = await axios.get(serverURL + "/bots/");
+export interface botQuery {
+  data: {
+    _id: string,
+    name: string,
+    title: string,
+    imageURL: string
+  }[]
+}
 
+export const getServerSideProps:GetServerSideProps = async (context) => {
+  const { data }:botQuery = await axios.get(serverURL + "/bots/");
+  
   return {
     props: {
-        bots: response.data
+        bots: data
     }  
   }
 }

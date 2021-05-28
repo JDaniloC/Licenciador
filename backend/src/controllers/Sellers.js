@@ -12,7 +12,7 @@ module.exports = {
     async store(request, response) {
         const { admin: creatorEmail,
                 email: sellerEmail, 
-            licenses, botlist, show 
+            tests, botlist, show 
         } = request.body;
 
         // This need to be a JWT token
@@ -26,11 +26,9 @@ module.exports = {
         if (!seller) { 
             seller = await Sellers.create({
                 email: sellerEmail,
-                tests: licenses,
                 type: "seller",
                 licenses: 0,
-                botlist,
-                show,
+                botlist, show, tests,
             })
         } else {
             seller.botlist.forEach(name => {
@@ -42,10 +40,10 @@ module.exports = {
             seller = await Sellers.findOneAndUpdate(
                 {email: sellerEmail},
                 {
-                    tests: licenses, 
-                    botlist, 
-                    show
+                    tests, botlist, show
                 })  
+            seller.show = show;
+            seller.tests = tests;
             seller.botlist = botlist;
         }
         seller.password = "";
@@ -54,8 +52,12 @@ module.exports = {
     },
 
     async destroy(request, response) {
-        const { email, creatorEmail } = request.body;
+        const { email, creatorEmail } = request.query;
         // This need to be a JWT token/
+        if (!email || !creatorEmail) {
+            return response.json({ "error": "Missing params: email, creatorEmail" });
+        }
+
         const creator = await Sellers.findOne({ email: creatorEmail });
 
         if (!creator || creator.type !== "admin") {

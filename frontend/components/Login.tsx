@@ -6,6 +6,15 @@ import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
 
+export interface LoginData {
+    data: {
+        botlist: []
+        email: string;
+        password: string;
+        type: string;
+    }
+}
+
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -38,12 +47,18 @@ export default function Login() {
     }
  
     async function handleLogin() {
-        const {data} = await axios.post(
+        const { data }:LoginData = await axios.post(
             serverURL + "/login", { email, password }
         ).catch((err) => {
             console.error(err)
-            return { data: {} }
+            return { data: {
+                email: undefined,
+                password: undefined,
+                botlist: undefined,
+                type: undefined,
+            } }
         })
+
         if (data.type === undefined) {
             shakeInput(emailRef.current);
             shakeInput(passwordRef.current);   
