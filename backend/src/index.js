@@ -5,7 +5,7 @@ const routes = require('./routes');
 const app = express();
 require('dotenv/config');
 
-mongoose.connect(process.env.MONGO_CONNECTION,{
+mongoose.connect(process.env.MONGO_CONNECTION, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false 

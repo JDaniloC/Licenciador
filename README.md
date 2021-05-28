@@ -24,17 +24,15 @@ Esse projeto desenvolvido com as seguintes tecnologias:
 
 ## Como rodar o projeto?
 
-Clone o projeto em seu computador, crie no backend um arquivo `.env`, escreva `MONGO_CONNECTION =`.
+Clone o projeto em seu computador, crie no backend um arquivo `.env`, escreva `MONGODB_URI =`.
 Configure o MongoDB e atualize o arquivo `.env`, com seu `User:Senha` para conexão.  
 
-Instalar as dependências e iniciar o servidor:
-
 ```bash
-cd backend
+cd frontend
 yarn install
 yarn dev
 ```
 
-Assim que o processo terminar, abra no seu navegador a página `localhost:3333` contendo o Projeto desenvolvido.
+Assim que o processo terminar, abra no seu navegador a página `localhost:3000`.
 </p>
 
