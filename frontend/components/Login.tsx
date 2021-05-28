@@ -8,7 +8,7 @@ import axios from 'axios';
 
 export interface LoginData {
     data: {
-        botlist: []
+        botList: []
         email: string;
         password: string;
         type: string;
@@ -48,13 +48,13 @@ export default function Login() {
  
     async function handleLogin() {
         const { data }:LoginData = await axios.post(
-            serverURL + "/login", { email, password }
+            serverURL + "/api/login", { email, password }
         ).catch((err) => {
             console.error(err)
             return { data: {
                 email: undefined,
                 password: undefined,
-                botlist: undefined,
+                botList: undefined,
                 type: undefined,
             } }
         })

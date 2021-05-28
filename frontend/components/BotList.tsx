@@ -25,7 +25,7 @@ export default function BotList({ bots }: { bots: Bot[] }) {
     useEffect(() => {
         const account = JSON.parse(localStorage.getItem("account"));
         setShowBots(account.show);
-        setAvailable(account.botlist);
+        setAvailable(account.botList);
     }, [])
 
     function selectBot(name: string, title: string) {

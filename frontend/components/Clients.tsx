@@ -16,10 +16,9 @@ export default function Clients() {
 
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data } = await axios.get(serverURL + "/clients/", {
+        const { data } = await axios.get(serverURL + "/api/clients/", {
             params: {
-                email: account.email,
-                bot: botName
+                email: account.email, botName
             }
         });
         const tempClients = {};
@@ -53,7 +52,7 @@ export default function Clients() {
         }
     
         const account = JSON.parse(localStorage.getItem('account')); 
-        const { data } = await axios.post(serverURL + "/licenses/", {
+        const { data } = await axios.post(serverURL + "/api/licenses/", {
             sellerEmail: account.email, clientEmail: email, isTest, botName
         })
        
@@ -73,8 +72,8 @@ export default function Clients() {
 
     async function createClient() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data } = await axios.post(serverURL + "/clients/", {
-            seller: account.email, client: newEmail, bot: botName
+        const { data } = await axios.post(serverURL + "/api/clients/", {
+            sellerEmail: account.email, clientEmail: newEmail, botName
         })
         clients[newEmail] = data;
         setNewEmail("");

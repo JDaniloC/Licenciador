@@ -14,9 +14,10 @@ interface Bot {
 
 export interface SellersData {
     data: {
-        botlist: []
+        botList: []
         email: string;
         password: string;
+        showBots: boolean;
         type: string;
     }[]
 }
@@ -34,7 +35,7 @@ export default function Clients({ bots }: { bots: Bot[] }) {
     async function loadSellers() {
         const account = JSON.parse(localStorage.getItem('account'));
         const { data }: SellersData = await axios.get(
-            serverURL + "/sellers/", {
+            serverURL + "/api/sellers/", {
             params: { email: account.email }
         });
 
@@ -57,8 +58,8 @@ export default function Clients({ bots }: { bots: Bot[] }) {
             if (sellers.hasOwnProperty(email)) {
                 sellers[email].tests = data.tests;
                 sellers[email].licenses = data.licenses;
-                sellers[email].botlist = data.botlist;
-                sellers[email].show = data.show;
+                sellers[email].botList = data.botList;
+                sellers[email].showBots = data.showBots;
             } else {
                 let newSellers = sellers;
                 newSellers[email] = data;
@@ -67,10 +68,9 @@ export default function Clients({ bots }: { bots: Bot[] }) {
         }
         const admin = JSON.parse(localStorage.getItem('account')).email;
     
-        const { data } = await axios.post(serverURL + "/sellers/", { 
-            email, admin, tests, 
-            botlist: sellerBots, 
-            show: showBots
+        const { data } = await axios.post(serverURL + "/api/sellers/", { 
+            sellerEmail: email, creatorEmail: admin, 
+            botList: sellerBots, showBots, tests, 
         })
         searchSeller(email, data)
         
@@ -86,7 +86,7 @@ export default function Clients({ bots }: { bots: Bot[] }) {
         if (!email) {
             return false;
         }
-        await axios.delete(serverURL + "/sellers/", {
+        await axios.delete(serverURL + "/api/sellers/", {
             params: { email, creatorEmail: admin }
         }).then(() => {
             setEmail("");
@@ -113,8 +113,8 @@ export default function Clients({ bots }: { bots: Bot[] }) {
             checked = false
         if (value !== "") {
             email = value
-            bots = sellers[value].botlist
-            checked = sellers[value].show
+            bots = sellers[value].botList
+            checked = sellers[value].showBots
             tests = sellers[value].tests
             licenses = sellers[value].licenses
         }

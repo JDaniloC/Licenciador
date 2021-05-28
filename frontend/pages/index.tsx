@@ -33,7 +33,11 @@ export interface botQuery {
 }
 
 export const getServerSideProps:GetServerSideProps = async (context) => {
-  const { data }:botQuery = await axios.get(serverURL + "/bots/");
+  const { data }:botQuery = await axios.get(
+    serverURL + "/api/bots/").catch((err) => {
+      console.error(err);
+      return { data: [] }
+    });
   
   return {
     props: {
