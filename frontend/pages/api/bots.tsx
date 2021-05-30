@@ -6,9 +6,23 @@ import {
     VercelResponse
 } from '@vercel/node';
 
+async function store(body: VercelRequestBody) {
+    const {name, title, imageURL} = body;
+
+    let bot = await Bots.findOne({name}); 
+    if (!bot) { 
+        bot = await Bots.create({
+            name,
+            title,
+            imageURL,
+        })
+    }
+    return bot;
+}
+
 async function destroy(body: VercelRequestBody) {
     const { name } = body;
-    return await Bots.findOneAndDelete({name});
+    return await Bots.findOneAndDelete({ name });
 }
 
 export default async (
@@ -22,16 +36,7 @@ export default async (
             res.status(200).json(bots);
             break;
         case "POST":
-            const {name, title, imageURL} = req.body;
-
-            let bot = await Bots.findOne({name}); 
-            if (!bot) { 
-                bot = await Bots.create({
-                    name,
-                    title,
-                    imageURL,
-                })
-            }
+            const bot = await store(req.body);
             res.status(200).json(bot);
             break;
         case "DELETE":

@@ -5,19 +5,20 @@ import {
     VercelResponse 
 } from '@vercel/node';
 import Clients, { ClientSchema } from '../../models/Clients';
-import Sellers from '../../models/Sellers';
 import { storeHistory } from './history';
 import { connectToDatabase } from './database';
+import Sellers from '../../models/Sellers';
+import toLowerCase from './utils';
 
 async function show(query: VercelRequestQuery) {
-    const { email, botName } = query;
+    const { email, botName, isSeller } = toLowerCase(query);
 
     let result = {};
-    const client = await Clients.findOne({ email }) as ClientSchema;
-    if (client) {
+    if (!isSeller) {
+        const client = await Clients.findOne({ email }) as ClientSchema;
         client.license.forEach(element => {
             if (element.botName === botName) {
-                result[email as string] = {
+                result[email] = {
                     timestamp: element.timestamp
                 }
             }
@@ -48,9 +49,7 @@ async function show(query: VercelRequestQuery) {
 }
 
 async function store(body: VercelRequestBody) {
-    let { sellerEmail, clientEmail, botName } = body;
-    sellerEmail = sellerEmail.toLowerCase();
-    clientEmail = clientEmail.toLowerCase();
+    const { sellerEmail, clientEmail, botName } = toLowerCase(body);
 
     if (!sellerEmail || !clientEmail || !botName) {
         return {}
@@ -100,7 +99,7 @@ async function store(body: VercelRequestBody) {
 }
 
 async function destroy(query: VercelRequestQuery) {
-    const { seller, email } = query;
+    const { seller, email } = toLowerCase(query);
 
     if (!seller || !email) {
         return { "error": "Missing params." };

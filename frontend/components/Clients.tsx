@@ -18,7 +18,7 @@ export default function Clients() {
         const account = JSON.parse(localStorage.getItem('account'));
         const { data } = await axios.get(serverURL + "/api/clients/", {
             params: {
-                email: account.email, botName
+                email: account.email, botName, isSeller: true
             }
         });
         const tempClients = {};

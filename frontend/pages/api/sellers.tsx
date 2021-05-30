@@ -1,13 +1,30 @@
-import { VercelRequest, VercelRequestBody, VercelRequestQuery, VercelResponse } from '@vercel/node';
+import { 
+    VercelRequest, 
+    VercelRequestBody, 
+    VercelRequestQuery, 
+    VercelResponse 
+} from '@vercel/node';
 import Sellers, { SellerSchema } from '../../models/Sellers';
 import { connectToDatabase } from './database';
 import { storeHistory } from './history';
+import toLowerCase from './utils';
+
+async function index(query: VercelRequestQuery) {
+    const { email } = toLowerCase(query);
+
+    const creator = await Sellers.findOne({ email }) as SellerSchema;
+    if (!creator || creator.type !== "admin") {
+        return {};
+    }
+
+    const allSellers = await Sellers.find();
+    return allSellers;
+}
 
 async function store(body: VercelRequestBody) {
     let { creatorEmail, sellerEmail, 
         tests, botList, showBots 
-    } = body;
-    sellerEmail = sellerEmail.toLowerCase();
+    } = toLowerCase(body);
 
     const creator = await Sellers.findOne(
         { email: creatorEmail }) as SellerSchema;
@@ -44,7 +61,7 @@ async function store(body: VercelRequestBody) {
 }
 
 async function destroy(query: VercelRequestQuery) {
-    const { email, creatorEmail } = query;
+    const { email, creatorEmail } = toLowerCase(query);
 
     if (!email || !creatorEmail) {
         return { "error": "Missing params: email, creatorEmail" };
@@ -67,7 +84,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     
     switch (req.method) {
         case "GET":
-            const allSellers = await Sellers.find();
+            const allSellers = await index(req.query);
             res.status(200).json(allSellers);
             break;
     
