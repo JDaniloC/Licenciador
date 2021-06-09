@@ -7,9 +7,9 @@
 ## 💻 O que é o projeto?
 
   <image alt="Vendedor" align="left" width=60%, src=".github/img1.png"/> 
-<p> Desenvolvimento web com sistema de login ADM que cadastra os vendedores, onde irá decidir o número de licenças e quais 'softwares' o vendedor conseguirá usar caso o ADM tenha selecionado a opção 'mostrar demais bots', caso contrário irá mostrar apenas os selecionados pelo ADM. <br>
-  Os vendedores controla a base de dados dos clientes, cadastrando-os, onde o vendedor disponibiliza os softwares para ser utilizado por um periodo de tempo determinado (3 dias, se escolhido teste grátis. 31 dias, se escolhido renovar licença) por  em troca das licenças ofertadas pelo ADM. <br>
-  ADM e vendedor tem a possiblidade de deletar os elementos que cadastraram.</p>
+<p> Desenvolvimento web com sistema de login ADM que cadastra os vendedores, onde irá decidir o número de licenças e quais 'softwares' o vendedor conseguirá revender. Possibilitando a visibilidade ou não dos demais softwares através do botão de 'mostrar demais bots'. <br>
+  Os vendedores controlam a base de dados dos clientes, cadastrando-os, de forma que o vendedor disponibiliza os softwares para ser utilizado por um periodo de tempo determinado (3 dias, se escolhido teste grátis. 31 dias, se escolhido renovar licença) de acordo com as licenças outorgadas pelo ADM. <br> 
+  Tanto o ADM quanto o vendedor tem a possiblidade de deletar os elementos que cadastraram. </p>
 <p>
 
 ## :rocket: Tecnologias
