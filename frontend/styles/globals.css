@@ -14,6 +14,9 @@ a {
 * {
   box-sizing: border-box;
 }
+button {
+  border-radius: none;
+}
 span.overlay {
   position: absolute;
   width: 100vw;

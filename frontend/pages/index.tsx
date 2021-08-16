@@ -1,13 +1,25 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
-import { HeaderProvider } from '../contexts/Header.context';
-import { RouterProvider } from '../contexts/Router.context';
-import Header from '../components/Header';
 import { GetServerSideProps } from 'next';
-import { serverURL } from '../config';
+import { useEffect } from 'react';
+import Head from 'next/head'
 import axios from 'axios';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import styles from '../styles/Home.module.css';
+
+import { HeaderProvider } from '../contexts/Header.context';
+import { RouterProvider } from '../contexts/Router.context';
+
+import Header from '../components/Header';
+import { serverURL } from '../config';
+
 export default function Home({ bots }) {
+  useEffect(() => {
+    const attentionList = JSON.parse(localStorage.getItem("attention"));
+    if (attentionList === null) {
+      localStorage.setItem('attention', JSON.stringify({}));
+    }
+  }, [])
+  
   return (
     <div className={styles.container}>
       <Head>

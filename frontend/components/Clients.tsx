@@ -1,49 +1,50 @@
 import styles from '../styles/components/Clients.module.css';
 import { HeaderContext } from '../contexts/Header.context';
+
 import { useContext, useEffect, useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Table from 'react-bootstrap/Table';
 import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
 
+export interface Client {
+    email: string;
+    license: number;
+    updateAt: string;
+}
+
 export default function Clients() {
     const { botName, setTests, setLicenses } = useContext(HeaderContext);
 
-    const [clients, setClients] = useState({});
     const [email, setEmail] = useState("");
     const [newEmail, setNewEmail] = useState("");
-    const [licenses, setClientLicenses] = useState("");
-    const [currentClient, setCurrentClient] = useState("");
-
+    const [licenses, setClientLicenses] = useState(0);
+    const [clients, setClients] = useState<Client[]>([]);
+    
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data } = await axios.get(serverURL + "/api/clients/", {
-            params: {
+        const { data }: { data: Client[] } = await axios.get(
+            serverURL + "/api/clients/", { params: {
                 email: account.email, botName, isSeller: true
             }
         });
-        const tempClients = {};
-
-        Object.keys(data).forEach(email => {
-            tempClients[email] = data[email];
-        });
-
-        setClients(tempClients);
+        setClients(data);
     }
 
     useEffect(() => {
         loadClients();
     }, [])
 
-    function selectClient(value) {
-        setCurrentClient(value); 
-        if (value !== "") {
-            const days = clients[value].licenses[botName];
-            setEmail(value)
-            setClientLicenses(days);
-        } else {
-            setEmail("");
-            setClientLicenses("");
-        }
+    function selectClient({ target }) {
+        const value = target.value;
+        let days = 0;
+        clients.map(client => {
+            if (client.email === value) days = client.license;
+        })
+        
+        setEmail(value);
+        setClientLicenses(days);
     }
 
     async function giveLicense(isTest:boolean = false) {
@@ -52,16 +53,24 @@ export default function Clients() {
         }
     
         const account = JSON.parse(localStorage.getItem('account')); 
+        const newAccount = JSON.parse(localStorage.getItem('account'))
         const { data } = await axios.post(serverURL + "/api/licenses/", {
             sellerEmail: account.email, clientEmail: email, isTest, botName
         })
        
-        const newAccount = JSON.parse(localStorage.getItem('account'))
-        newAccount['licenses'] = data.licenses
-        newAccount['tests'] = data.tests
-        clients[email].licenses[botName] = data.time;
+        newAccount['licenses'] = data.licenses;
+        newAccount['tests'] = data.tests;
+
+        const newClients = clients.map(client => {
+            if (client.email === email) {
+                client.license = data.time;
+                client.updateAt = data.updateTime;
+            }
+            return client;
+        })
         localStorage.setItem("account", JSON.stringify(newAccount))
         
+        setClients(newClients);
         setClientLicenses(data.time);
         if (isTest) {
             setTests(data.tests)
@@ -92,7 +101,7 @@ export default function Clients() {
         }).then(() => {
             setEmail("");
             loadClients();
-            setClientLicenses("");
+            setClientLicenses(0);
         })
     }
 
@@ -105,22 +114,6 @@ export default function Clients() {
         </h2>
         <section className="dashboard">
             <section className = {styles.clients}>
-                <div>
-                    <h2> Clientes cadastrados </h2>
-                    <select name="clients" value = {currentClient}
-                        onChange = {(evt) => { 
-                            selectClient(evt.target.value); 
-                        }}>
-                        <option value=""> 
-                            Selecionar 
-                        </option>
-                        {Object.keys(clients).map((client) => (
-                            <option value={client} key = {client}>
-                                {client}
-                            </option>
-                        ))}
-                    </select>
-                </div>
                 <div> 
                     <h2> Cadastrar novo cliente </h2>
                     <form>
@@ -155,6 +148,31 @@ export default function Clients() {
                     </button>
                 </form>
             </section>
+        </section>
+        <section className = {styles.clientList}>
+            <Table hover>
+                <thead>
+                    <tr>
+                        <th> E-mail </th>
+                        <th> Dias </th>
+                        <th> Desde </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {clients.map((client) => (
+                        <tr key = {client.email}>
+                            <td> {client.email} </td>
+                            <td> {client.license} </td>
+                            <td> {client.updateAt} </td>
+                            <Button variant = "outline-primary"
+                                value = {client.email}
+                                onClick = {selectClient}>
+                                Visualizar
+                            </Button>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
         </section>
     </>)    
 }

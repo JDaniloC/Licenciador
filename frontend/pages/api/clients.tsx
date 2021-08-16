@@ -10,42 +10,60 @@ import { connectToDatabase } from './database';
 import Sellers from '../../models/Sellers';
 import toLowerCase from './utils';
 
-async function show(query: VercelRequestQuery) {
-    const { email, botName, isSeller } = toLowerCase(query);
-
-    let result = {};
-    if (!isSeller) {
-        const client = await Clients.findOne({ email }) as ClientSchema;
-        client.license.forEach(element => {
-            if (element.botName === botName) {
-                result[email] = {
-                    timestamp: element.timestamp
-                }
+async function show(email: string, botName: string) {
+    const result = {};
+    const client = await Clients.findOne({ email }) as ClientSchema;
+    client.license.forEach(element => {
+        if (element.botName === botName) {
+            result[email] = {
+                timestamp: element.timestamp
             }
-        }); 
-    } else {
-        const clientList = await Clients.find({ seller: email }) as ClientSchema[];
-        if (clientList.length > 0) {
-            clientList.forEach(client => {
-                client.license.map((element) => {
-                    if (element.botName === botName) {
-                        let timestamp = element.timestamp - (new Date().getTime() / 1000);
-                        if (timestamp < 0) {
-                            timestamp = 0
-                        } else {
-                            timestamp /= 86400
-                        }
-                        result[client.email] = {
-                            licenses: {
-                                [botName as string]: Math.round(timestamp)
-                            }
-                        }
-                    }
-                })
-            })
         }
-    } 
+    }); 
     return result;
+}
+
+async function index(email: string, botName: string) {
+    let result = [];
+    const clientList = await Clients.find({ seller: email }) as ClientSchema[];
+    if (clientList.length > 0) {
+        clientList.forEach(client => {
+            client.license.map((element) => {
+                if (element.botName === botName) {
+                    let timestamp = element.timestamp - (
+                        new Date().getTime() / 1000);
+                    if (timestamp < 0) {
+                        timestamp = 0
+                    } else {
+                        timestamp /= 86400
+                    }
+                    
+                    let updateString = "?";
+                    try {
+                        updateString = client.updateTime.toLocaleString("pt-BR")
+                    } catch (e) {
+                        console.log(e)
+                    }
+
+                    result.push({
+                        email: client.email,
+                        updateAt: updateString,
+                        license: Math.round(timestamp)
+                    })
+                }
+            })
+        })
+    }
+    return result;
+}
+
+async function getClient(query: VercelRequestQuery) {
+    const { email, botName, isSeller } = toLowerCase(query);
+    if (isSeller) {
+        return await index(email, botName);
+    } else {
+        return await show(email, botName);
+    }
 }
 
 async function store(body: VercelRequestBody) {
@@ -62,6 +80,7 @@ async function store(body: VercelRequestBody) {
         await Clients.create({
             email: clientEmail,
             seller: sellerEmail,
+            updateTime: today, 
             license: [{
                 botName,
                 updateTime: today, 
@@ -129,8 +148,8 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     
     switch (req.method) {
         case "GET":
-            const clientList = await show(req.query);
-            res.status(200).json(clientList);
+            const response = await getClient(req.query);
+            res.status(200).json(response);
             break;
         case "POST":
             const newClient = await store(req.body);

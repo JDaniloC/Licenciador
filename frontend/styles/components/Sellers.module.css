@@ -18,6 +18,7 @@
     padding: 1em;
 }
 .botSelection {
+    flex: 1 1;
     display: flex;
     flex-wrap: wrap;
     text-align: center;
@@ -27,6 +28,7 @@
 }
 .botSelection label {
     display: flex;
+    flex: 1;
 }
 .botSelection label input {
     opacity: 0;
