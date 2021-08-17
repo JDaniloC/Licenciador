@@ -47,11 +47,12 @@ export default function Clients() {
         setClientLicenses(days);
     }
 
-    async function giveLicense(isTest:boolean = false) {
+    async function giveLicense(evt) {
         if (!email) {
             return;
         }
     
+        const isTest = evt.target.id === "test";
         const account = JSON.parse(localStorage.getItem('account')); 
         const newAccount = JSON.parse(localStorage.getItem('account'))
         const { data } = await axios.post(serverURL + "/api/licenses/", {
@@ -121,9 +122,10 @@ export default function Clients() {
                             value = {newEmail} onChange = {({ target }) => {
                                 setNewEmail(target.value);
                             }}/>
-                        <button type = "button" onClick = {() => {createClient()}}> 
+                        <Button variant = "primary" 
+                            onClick = {createClient}> 
                             Adicionar novo cliente 
-                        </button>
+                        </Button>
                     </form>
                 </div>
             </section>
@@ -133,19 +135,19 @@ export default function Clients() {
                     <input value = {email} placeholder = "E-mail" disabled/>
                     <input type="number" value = {licenses}
                         placeholder = "Dias da licença" disabled/>
-                    <div>
-                        <button onClick = {() => {giveLicense(true)}} 
-                            type = "button"> 
+                    <div style = {{ margin: "5px 0" }}>
+                        <Button variant = "outline-primary" id = "test"
+                            onClick = {giveLicense}> 
                             Teste grátis 
-                        </button>
-                        <button onClick = {() => {giveLicense()}} 
-                            type = "button">  
+                        </Button>
+                        <Button variant = "outline-primary" 
+                            onClick = {giveLicense}>
                             Renovar licença 
-                        </button>
+                        </Button>
                     </div>
-                    <button onClick = {() => {deleteClient()}} type = "button"> 
+                    <Button variant = "danger" onClick = {deleteClient}>
                         Deletar usuário 
-                    </button>
+                    </Button>
                 </form>
             </section>
         </section>

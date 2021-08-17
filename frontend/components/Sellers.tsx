@@ -1,9 +1,10 @@
 import styles from '../styles/components/Sellers.module.css';
 import { HeaderContext } from '../contexts/Header.context';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
-import { serverURL } from '../config';
 
 interface Bot {
     _id: string,
@@ -160,12 +161,12 @@ export default function Clients({ bots }: { bots: Bot[] }) {
                             <input type="checkbox" name="show" checked = {showBots}
                                 onChange = {({ target }) => {setShowBots(target.checked)}}/>
                         </div>
-                        <button type = "button" onClick = {() => {saveSeller()}}> 
+                        <Button onClick = {saveSeller}> 
                             Adicionar/Salvar vendedor 
-                        </button>
-                        <button onClick = {() => {deleteSeller()}} type = "button">
+                        </Button>
+                        <Button variant = "danger" onClick = {deleteSeller}>
                             Deletar vendedor
-                        </button>
+                        </Button>
                     </form>
                 </div>
             </section>

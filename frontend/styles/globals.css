@@ -15,7 +15,11 @@ a {
   box-sizing: border-box;
 }
 button {
-  border-radius: none;
+  border: 0.1px solid;
+}
+button:hover {
+  background: #DDD;
+  transition: 0.2s;
 }
 span.overlay {
   position: absolute;
