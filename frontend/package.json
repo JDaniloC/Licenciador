@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "frontend",
+=======
+  "name": "licenciador",
+>>>>>>> 2c452c769823a16ad60ea56382f0b155678bb811
   "version": "3.0",
   "private": true,
   "scripts": {
