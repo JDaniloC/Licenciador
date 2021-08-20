@@ -2,7 +2,6 @@ import styles from '../styles/components/Sellers.module.css';
 import { HeaderContext } from '../contexts/Header.context';
 import { useContext, useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
 
@@ -36,7 +35,7 @@ export default function Clients({ bots }: { bots: Bot[] }) {
     async function loadSellers() {
         const account = JSON.parse(localStorage.getItem('account'));
         const { data }: SellersData = await axios.get(
-            serverURL + "/api/sellers/", {
+            "/api/sellers/", {
             params: { email: account.email }
         });
 
@@ -69,7 +68,7 @@ export default function Clients({ bots }: { bots: Bot[] }) {
         }
         const admin = JSON.parse(localStorage.getItem('account')).email;
     
-        const { data } = await axios.post(serverURL + "/api/sellers/", { 
+        const { data } = await axios.post("/api/sellers/", { 
             sellerEmail: email, creatorEmail: admin, 
             botList: sellerBots, showBots, tests, 
         })
@@ -87,7 +86,7 @@ export default function Clients({ bots }: { bots: Bot[] }) {
         if (!email) {
             return false;
         }
-        await axios.delete(serverURL + "/api/sellers/", {
+        await axios.delete("/api/sellers/", {
             params: { email, creatorEmail: admin }
         }).then(() => {
             setEmail("");

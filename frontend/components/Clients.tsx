@@ -4,7 +4,6 @@ import { HeaderContext } from '../contexts/Header.context';
 import { useContext, useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
-import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
 
@@ -25,7 +24,7 @@ export default function Clients() {
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
         const { data }: { data: Client[] } = await axios.get(
-            serverURL + "/api/clients/", { params: {
+            "/api/clients/", { params: {
                 email: account.email, botName, isSeller: true
             }
         });
@@ -55,7 +54,7 @@ export default function Clients() {
         const isTest = evt.target.id === "test";
         const account = JSON.parse(localStorage.getItem('account')); 
         const newAccount = JSON.parse(localStorage.getItem('account'))
-        const { data } = await axios.post(serverURL + "/api/licenses/", {
+        const { data } = await axios.post("/api/licenses/", {
             sellerEmail: account.email, clientEmail: email, isTest, botName
         })
        
@@ -82,7 +81,7 @@ export default function Clients() {
 
     async function createClient() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data } = await axios.post(serverURL + "/api/clients/", {
+        const { data } = await axios.post("/api/clients/", {
             sellerEmail: account.email, clientEmail: newEmail, botName
         })
         clients[newEmail] = data;
@@ -95,7 +94,7 @@ export default function Clients() {
         if (!email) {
             return false;
         }
-        await axios.delete(serverURL + "/api/clients/", {
+        await axios.delete("/api/clients/", {
             params: {
                 seller: account.email, email
             }

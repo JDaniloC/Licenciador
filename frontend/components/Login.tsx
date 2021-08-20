@@ -2,7 +2,6 @@ import styles from '../styles/components/Login.module.css';
 import { HeaderContext } from '../contexts/Header.context';
 import { RouterContext } from '../contexts/Router.context';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { serverURL } from '../config';
 import Head from 'next/head'
 import axios from 'axios';
 
@@ -48,7 +47,7 @@ export default function Login() {
  
     async function handleLogin() {
         const { data }:LoginData = await axios.post(
-            serverURL + "/api/login", { email, password }
+            "/api/login", { email, password }
         ).catch((err) => {
             console.error(err)
             return { data: {
