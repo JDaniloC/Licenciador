@@ -1,6 +1,6 @@
 module.exports = {
     images: {
-      domains: [],
+        disableStaticImages: true,
     },
     async headers() {
       return [
