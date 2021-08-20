@@ -12,6 +12,7 @@
 .sellers form {
     display: flex;
     flex-direction: column;
+    margin: auto;
     width: 20em;
 }
 .sellers form * {
@@ -41,6 +42,7 @@
     border-radius: 2em;
     border: solid 0.1px;
     padding: 0.5em 1em;
+    max-height: 10em;
     cursor: pointer;
     margin: 0.5em;
     flex: 1;
