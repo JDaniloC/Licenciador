@@ -10,6 +10,7 @@ import { HeaderProvider } from '../contexts/Header.context';
 import { RouterProvider } from '../contexts/Router.context';
 
 import Header from '../components/Header';
+import { serverURL } from '../config';
 
 export default function Home({ bots }) {
   useEffect(() => {
@@ -44,8 +45,9 @@ export interface botQuery {
 }
 
 export const getServerSideProps:GetServerSideProps = async (context) => {
+  console.log("Requesting ", serverURL, "/api/bots/")
   const { data }:botQuery = await axios.get(
-    "/api/bots/").catch((err) => {
+    serverURL + "/api/bots/").catch((err) => {
       console.error(err);
       return { data: [] }
     });
