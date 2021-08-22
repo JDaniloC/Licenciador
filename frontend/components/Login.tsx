@@ -19,9 +19,8 @@ export default function Login() {
     const [password, setPassword] = useState("");
     
     const {
-        setLicenses, setTests,
+        setLicenses, changeDisplay,
         overlayDisplay, loginDisplay,
-        changeDisplay
     } = useContext(HeaderContext);
     const {
         setRoute
@@ -78,7 +77,6 @@ export default function Login() {
             setRoute("sellers");
         } else {
             setLicenses(account.licenses);
-            setTests(account.tests);
             setRoute("botList");
         }
     }

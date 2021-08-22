@@ -5,7 +5,7 @@ import styles from '../styles/components/Header.module.css';
 
 export default function Header() {
     const { changeDisplay, setCanBack, 
-        licenses, tests, canBack } = useContext(HeaderContext);
+        licenses, canBack } = useContext(HeaderContext);
     const { setRoute } = useContext(RouterContext);
 
     function closeAccount() {
@@ -24,10 +24,6 @@ export default function Header() {
             <h1> Licenciador </h1>
             <div>
                 <p id = "licenseNumber"> {licenses} </p>
-                <img src="https://i.pinimg.com/originals/c1/2d/c5/c12dc536b8f8797b629eb9942a2dbbf1.gif"/>
-            </div>
-            <div>
-                <p id = "testNumber"> {tests} </p>
                 <img src="https://i.pinimg.com/originals/c1/2d/c5/c12dc536b8f8797b629eb9942a2dbbf1.gif"/>
             </div>
             <button style = {{ opacity: 1 }} onClick = {closeAccount}>

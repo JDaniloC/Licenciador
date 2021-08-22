@@ -12,6 +12,7 @@
     border: solid 0.1px;
     cursor: pointer;
     border-radius: 2em;
+    max-width: 15em;
 }
 .botList button div {
     display: flex;

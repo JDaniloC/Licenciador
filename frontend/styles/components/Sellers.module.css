@@ -66,6 +66,10 @@
 .botSelection input:checked + span:hover {
     background-color: #555;
 }
+.botSelection h3 {
+    display: block;
+    max-width: 5em;
+}
 .showBots {
     border: solid 0.1px #666;
     border-radius: 2px;

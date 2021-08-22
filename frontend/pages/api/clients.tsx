@@ -109,11 +109,9 @@ async function store(body: VercelRequestBody) {
     }
 
     return {
-        seller: sellerEmail,
-        since: today,
-        licenses: {
-            [botName]: 0
-        }
+        email: clientEmail,
+        updateAt: new Date().toLocaleString("pt-BR"),
+        license: 0
     };
 }
 

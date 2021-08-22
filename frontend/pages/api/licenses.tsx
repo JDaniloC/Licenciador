@@ -7,10 +7,9 @@ import toLowerCase from './utils';
 
 async function store(body: VercelRequestBody) {
     const { sellerEmail, clientEmail,
-        botName, isTest } = toLowerCase(body);
+        botName, licenseDays } = toLowerCase(body);
     
-    if (!sellerEmail || !clientEmail || !botName || 
-        isTest === undefined) {
+    if (!sellerEmail || !clientEmail || !botName || !licenseDays) {
         return {};
     } 
     
@@ -20,7 +19,6 @@ async function store(body: VercelRequestBody) {
     const result = {
         updateTime: new Date(client.updateTime).toLocaleString("pt-BR"),
         licenses: seller.licenses,
-        tests: seller.tests,
         time: 0
     }
     
@@ -29,46 +27,38 @@ async function store(body: VercelRequestBody) {
     }
     
     const agora = new Date().getTime() / 1000;
-    const licenses = client.license;
-    let daysToAdd = 0;
-    if (isTest && seller.tests > 0) {
-        result.tests -= 1;
-        daysToAdd = 3;
-    } else if (!isTest){
-        daysToAdd = 31;
-        result.licenses += 1;
-    }
+    const licenseList = client.license;
+    result.licenses += 1;
     
     let foundBot = false;
-    licenses.forEach(bot => {
+    licenseList.forEach(bot => {
         if (bot.botName === botName) {
             foundBot = true;
-            bot.timestamp = agora + 86400 * daysToAdd;
-            result.time = daysToAdd;
+            bot.timestamp = agora + 86400 * licenseDays;
+            result.time = licenseDays;
         }
     })
     if (!foundBot) {
-        licenses.push({
+        licenseList.push({
             botName: botName,
-            timestamp: agora + 86400 * daysToAdd
+            timestamp: agora + 86400 * licenseDays
         })
-        result.time = daysToAdd;
+        result.time = licenseDays;
     }
     
     result.updateTime = new Date(today).toLocaleString("pt-BR");
     await Sellers.findOneAndUpdate(
         {email: sellerEmail}, {
-            licenses: result.licenses,
-            tests: result.tests
+            licenses: result.licenses
         });
     await Clients.findOneAndUpdate(
         {email: clientEmail}, {
-            license: licenses,
+            license: licenseList,
             updateTime: today, 
         })            
     
-    if (daysToAdd > 0) {
-        storeHistory(sellerEmail, `Added ${daysToAdd} days to ${clientEmail}.`)
+    if (licenseDays > 0) {
+        storeHistory(sellerEmail, `Added ${licenseDays} days to ${clientEmail}.`)
     }
     return result;
 }

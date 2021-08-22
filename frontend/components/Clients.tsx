@@ -2,8 +2,10 @@ import styles from '../styles/components/Clients.module.css';
 import { HeaderContext } from '../contexts/Header.context';
 
 import { useContext, useEffect, useState } from 'react';
+import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
+import Form from 'react-bootstrap/Form';
 import Head from 'next/head'
 import axios from 'axios';
 
@@ -14,11 +16,12 @@ export interface Client {
 }
 
 export default function Clients() {
-    const { botName, setTests, setLicenses } = useContext(HeaderContext);
+    const { botName, setLicenses } = useContext(HeaderContext);
 
     const [email, setEmail] = useState("");
     const [newEmail, setNewEmail] = useState("");
-    const [licenses, setClientLicenses] = useState(0);
+    const [licenseDays, setLicenseDays] = useState(1);
+    const [clientLicenses, setClientLicenses] = useState(0);
     const [clients, setClients] = useState<Client[]>([]);
     
     async function loadClients() {
@@ -51,32 +54,28 @@ export default function Clients() {
             return;
         }
     
-        const isTest = evt.target.id === "test";
         const account = JSON.parse(localStorage.getItem('account')); 
         const newAccount = JSON.parse(localStorage.getItem('account'))
         const { data } = await axios.post("/api/licenses/", {
-            sellerEmail: account.email, clientEmail: email, isTest, botName
+            sellerEmail: account.email, clientEmail: email, licenseDays, botName
         })
        
         newAccount['licenses'] = data.licenses;
-        newAccount['tests'] = data.tests;
+        let foundClient = false;
 
         const newClients = clients.map(client => {
             if (client.email === email) {
                 client.license = data.time;
                 client.updateAt = data.updateTime;
+                foundClient = true;
             }
             return client;
         })
         localStorage.setItem("account", JSON.stringify(newAccount))
         
         setClients(newClients);
+        setLicenses(data.licenses);
         setClientLicenses(data.time);
-        if (isTest) {
-            setTests(data.tests)
-        } else {
-            setLicenses(data.licenses);
-        }
     }
 
     async function createClient() {
@@ -84,7 +83,8 @@ export default function Clients() {
         const { data } = await axios.post("/api/clients/", {
             sellerEmail: account.email, clientEmail: newEmail, botName
         })
-        clients[newEmail] = data;
+        console.log(data)
+        setClients(prev => [...prev, data]);
         setNewEmail("");
     }
     
@@ -103,6 +103,11 @@ export default function Clients() {
             loadClients();
             setClientLicenses(0);
         })
+    }
+
+    function changeLicenseDays(evt) {
+        const value = evt.target.value;
+        setLicenseDays(value);
     }
 
     return (<>
@@ -132,16 +137,20 @@ export default function Clients() {
                 <h2> Dados do cliente </h2>
                 <form>
                     <input value = {email} placeholder = "E-mail" disabled/>
-                    <input type="number" value = {licenses}
+                    <input type="number" value = {clientLicenses}
                         placeholder = "Dias da licença" disabled/>
-                    <div style = {{ margin: "5px 0" }}>
-                        <Button variant = "outline-primary" id = "test"
-                            onClick = {giveLicense}> 
-                            Teste grátis 
-                        </Button>
+                    <div style = {{ margin: "1em 0 0" }}>
+                        <FloatingLabel className="mb-3"
+                                label="Dias de licença"
+                            >
+                            <Form.Control min = {1}
+                                value = {licenseDays} type="number" 
+                                onChange = {changeLicenseDays}/>
+                        </FloatingLabel>
                         <Button variant = "outline-primary" 
+                            style = {{ height: "fit-content" }}
                             onClick = {giveLicense}>
-                            Renovar licença 
+                            Conceder licença
                         </Button>
                     </div>
                     <Button variant = "danger" onClick = {deleteClient}>
