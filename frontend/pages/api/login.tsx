@@ -1,6 +1,6 @@
 import { VercelRequest, VercelRequestBody, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './database';
-import Sellers from '../../models/Sellers';
+import Sellers, { SellerSchema } from '../../models/Sellers';
 import MD5 from './MD5';
 
 async function store(body: VercelRequestBody) {
@@ -11,19 +11,19 @@ async function store(body: VercelRequestBody) {
             error: 'Params required: email, password'
         };
     }
-    let conta = await Sellers.findOne({ email });
-    let encrypted = MD5(password);
+    const account = await Sellers.findOne({ email }) as SellerSchema;
+    const encrypted = MD5(password);
     let result = {};
-    if (conta) {
-        if (conta.password) {
-            if (conta.password === encrypted) {
-                result = conta;
+    if (account) {
+        if (account.password) {
+            if (account.password === encrypted) {
+                result = account;
             }
         } else {
             await Sellers.findOneAndUpdate(
                 { email }, {password: encrypted}
             );
-            result = conta;
+            result = account;
         }
     } 
 

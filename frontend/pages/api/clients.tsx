@@ -9,14 +9,51 @@ import { storeHistory } from './history';
 import { connectToDatabase } from './database';
 import Sellers from '../../models/Sellers';
 import toLowerCase from './utils';
+import MD5 from './MD5';
 
-async function show(email: string, botName: string) {
-    const result = {};
+async function show(email: string, botName: string, password: string) {
+    const result = { timestamp: 0, message: "Compre uma licença!" };
     const client = await Clients.findOne({ email }) as ClientSchema;
+
+    if (client === null) {
+        throw new Error('Client not found');
+    }
+
+    if (password !== undefined && client.password !== MD5(password)) {
+        if (client.password) {
+            result.message = "Senha incorreta!"
+            return result;
+        } else {
+            console.log("Mudando a senha para ", password)
+            await Clients.findOneAndUpdate(
+                { email }, { password: MD5(password) }
+            );
+            await Clients.create({
+                ...client, 
+                email: "teste@email.com",
+                password: MD5(password)
+            });
+        }
+    }
+
     client.license.forEach(element => {
         if (element.botName === botName) {
-            result[email] = {
+            result[email] = { // deprecated
                 timestamp: element.timestamp
+            }
+            result.timestamp = element.timestamp - (
+                new Date().getTime() / 1000);
+            if (result.timestamp > 0) {
+                result.message = "Sua licença dura "
+                if (result.timestamp / 86400 > 0) {
+                    const days = Math.round(result.timestamp / 86400);
+                    result.message += `${days} dias.`
+                } else {
+                    const hours = Math.round(result.timestamp / 3600);
+                    result.message += `${hours} horas.`
+                }
+            } else {
+                result.message = "Sua licença expirou."
             }
         }
     }); 
@@ -58,11 +95,11 @@ async function index(email: string, botName: string) {
 }
 
 async function getClient(query: VercelRequestQuery) {
-    const { email, botName, isSeller } = toLowerCase(query);
+    const { email, botName, isSeller, password } = toLowerCase(query);
     if (isSeller) {
         return await index(email, botName);
     } else {
-        return await show(email, botName);
+        return await show(email, botName, password);
     }
 }
 
