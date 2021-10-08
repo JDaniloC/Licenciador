@@ -7,7 +7,7 @@ import {
 } from '@vercel/node';
 
 async function store(body: VercelRequestBody) {
-    const {name, title, imageURL} = body;
+    const {name, title, imageURL, extraInfo} = body;
 
     let bot = await Bots.findOne({name}); 
     if (!bot) { 
@@ -15,6 +15,7 @@ async function store(body: VercelRequestBody) {
             name,
             title,
             imageURL,
+            extraInfo
         })
     }
     return bot;
@@ -32,8 +33,14 @@ export default async (
 
     switch (req.method) {
         case "GET":
-            const bots = await Bots.find();
-            res.status(200).json(bots);
+            const { name } = req.query;
+            if (name) {
+                const bot = await Bots.findOne({ name }); 
+                res.status(200).json(bot);
+            } else {
+                const bots = await Bots.find();
+                res.status(200).json(bots);
+            }
             break;
         case "POST":
             const bot = await store(req.body);

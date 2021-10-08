@@ -32,3 +32,8 @@
     font-size: 2em;
 }
 
+@media (max-width: 550px) {
+    .header h1 {
+        display: none;
+    }
+}
