@@ -25,7 +25,7 @@ export default function Clients() {
     const [clients, setClients] = useState<Client[]>([]);
 
     const [pageCount, setPageCount] = useState<number>(0);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [currentPage, setCurrentPage] = useState<number>(0);
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [sortCriteria, setSortCriteria] = useState<string>("email");
     const [filteredClients, setFilteredClients] = useState<Client[]>([]);
@@ -39,7 +39,7 @@ export default function Clients() {
         });
         setClients(data);
         setFilteredClients(data);
-        setPageCount(Math.floor(data.length / PER_PAGE));
+        setPageCount(Math.ceil(data.length / PER_PAGE));
     }
 
     useEffect(() => {
@@ -55,7 +55,7 @@ export default function Clients() {
                 searchTerm.toLowerCase()) !== -1))
         setFilteredClients(filtered);
         setPageCount(Math.floor(filtered.length / PER_PAGE));
-    }, [searchTerm])
+    }, [searchTerm, clients])
 
     function selectClient({ target }) {
         const value = target.value;
@@ -106,8 +106,10 @@ export default function Clients() {
         const { data } = await axios.post("/api/clients/", {
             sellerEmail: account.email, clientEmail: newEmail, botName
         })
-        clients[newEmail] = data;
         setNewEmail("");
+        setClients(prevState => [...prevState, {
+            email: newEmail, license: 0, updateAt: data.since
+        }]);
     }
     
     async function deleteClient() {
