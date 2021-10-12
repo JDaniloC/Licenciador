@@ -4,12 +4,14 @@ import {
     VercelRequestQuery, 
     VercelResponse 
 } from '@vercel/node';
-import Clients, { ClientSchema } from '../../models/Clients';
-import { storeHistory } from './history';
+import Clients, { ClientSchema } from 'models/Clients';
 import { connectToDatabase } from './database';
-import Sellers from '../../models/Sellers';
-import toLowerCase from './utils';
-import MD5 from './MD5';
+import { storeHistory } from './history';
+
+import toLowerCase from 'utils/GetRequest';
+import Sellers from 'models/Sellers';
+import Users from 'models/Users';
+import MD5 from 'utils/MD5';
 
 async function show(email: string, botName: string, password: string) {
     const result = { timestamp: 0, message: "Compre uma licença!" };
@@ -174,6 +176,7 @@ async function destroy(query: VercelRequestQuery) {
         }
 
         await Clients.findOneAndDelete({ email });
+        await Users.findOneAndDelete({ email });
 
         storeHistory(seller, `Deleted the ${email} client.`)
     }

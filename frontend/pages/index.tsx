@@ -1,5 +1,4 @@
 import { GetServerSideProps } from 'next';
-import { useEffect } from 'react';
 import Head from 'next/head'
 import axios from 'axios';
 
@@ -13,13 +12,6 @@ import Header from '../components/Header';
 import { serverURL } from '../config';
 
 export default function Home({ bots }) {
-  useEffect(() => {
-    const attentionList = JSON.parse(localStorage.getItem("attention"));
-    if (attentionList === null) {
-      localStorage.setItem('attention', JSON.stringify({}));
-    }
-  }, [])
-  
   return (
     <div className={styles.container}>
       <Head>
