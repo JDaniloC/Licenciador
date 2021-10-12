@@ -6,7 +6,7 @@ import {
 } from '@vercel/node';
 
 import Clients, { ClientSchema } from 'models/Clients';
-import Users, { UserSchema } from 'models/Users';
+import Users, { UserSchema, UserLicense } from 'models/Users';
 import Bots, { BotSchema } from 'models/Bots';
 import { connectToDatabase } from './database';
 
@@ -23,7 +23,7 @@ async function show(email: string) {
     }
     const client = await Clients.findOne({ email }) as ClientSchema;
     const botList = await Bots.find() as BotSchema[];
-    const licenses = []
+    const licenses: UserLicense[] = []
 
     for (let index = 0; index < client.license.length; index++) {
         const license = client.license[index];
@@ -39,16 +39,15 @@ async function show(email: string) {
             remaining: GetRemaining(license.timestamp),
         });
     }
+    const createdAt = new Date(user.createdAt).toLocaleString("pt-BR");
 
     return { 
-        licenses,
         email: user.email, 
+        licenses, createdAt,
         trades: user.trades, 
-        seller: client.seller,
-        createdAt: user.createdAt,
-        totalYield: user.totalYield, 
         initialBalance: user.initialBalance,
         additionalInfo: user.additionalInfo,
+        totalYield: user.totalYield.toFixed(2), 
     }
 }
 
@@ -90,11 +89,13 @@ async function store(body: VercelRequestBody) {
         return {}
     }
 
+    const { title: botTitle } = await Bots.findOne({ name: botName });
     user.trades.push({
+        botName, result, botTitle,
+        amount: amount.toFixed(2), 
         infos: infos.toUpperCase(), 
-        botName, account,
-        result, amount, 
-        date: today 
+        account: account.toUpperCase(), 
+        date: today.toLocaleString("pt-BR")
     });
     user.totalYield += amount
     if (user.trades.length > MAX_TRADES) {
