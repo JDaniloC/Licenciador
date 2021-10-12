@@ -1,10 +1,11 @@
-import { connectToDatabase } from './database';
-import Bots from '../../models/Bots';
 import { 
     VercelRequestBody,
     VercelRequest, 
     VercelResponse
 } from '@vercel/node';
+
+import { connectToDatabase } from './database';
+import Bots from 'models/Bots';
 
 async function store(body: VercelRequestBody) {
     const {name, title, imageURL, extraInfo} = body;

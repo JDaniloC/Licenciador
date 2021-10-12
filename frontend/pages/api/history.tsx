@@ -1,7 +1,8 @@
 import { VercelRequest, VercelRequestBody, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './database';
-import Histories from '../../models/History';
-import Sellers from '../../models/Sellers';
+
+import Histories from 'models/History';
+import Sellers from 'models/Sellers';
 
 export async function storeHistory(who: string, what: string) {
     await Histories.create({

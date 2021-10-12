@@ -1,0 +1,126 @@
+.clientContainer {
+    display: flex;
+}
+.clientContainer div {
+    margin: 2em;
+    width: 100%;
+}
+
+.infos {
+    text-align: center;
+}
+
+.tradeList {
+    display: flex;
+    flex-direction: column-reverse;
+}
+.trade {
+    font-size: 1.3em;
+    display: flex;
+    text-align: start;
+    border: solid 1px #CCC;
+}
+.trade p {
+    flex: 1 1;
+    margin: auto;
+    padding: 1em;
+}
+.trade p:first-child,
+.trade p:nth-child(2) {
+    flex: 2;
+}
+.trade p:not(:first-child) {
+    text-align: center;
+}
+.trade[data-result="win"] {
+    border-color: green;
+}
+.trade[data-result="loss"] {
+    border-color: red;
+}
+
+.trade p[data-account="DEMO"] {
+    background-color: rgb(255, 65, 65);
+    border-radius: 8px;
+    color: #FFF;
+    margin: 1em 0;
+}
+.trade p[data-account="REAL"] {
+    background-color: rgb(68, 221, 37);
+    border-radius: 8px;
+    color: #FFF;
+    margin: 1em 0;
+}
+
+.botList {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 50vw;
+    justify-content: center;
+    margin-top: 4em;
+}
+.botList h1 {
+    margin: 1em;
+}
+.botList button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: auto;
+
+    background-color: transparent;
+    margin: 0.5em;
+    width: 15em;
+    padding: 1em;
+    border: solid 0.1px;
+    border-radius: 2em;
+}
+.botList button div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    width: 10em;
+    overflow: hidden;
+    border-radius: 100%;
+}
+.botList button img {
+    height: 10em;
+}
+.botList button:hover {
+    color: white;
+    background-color: #777;
+}
+.botList button:disabled{
+    background-color: #ddd;
+}
+.botList button:disabled:hover {
+    color: #999;
+    background-color: #ddd;
+}
+
+@media (max-width: 1500px) {
+    .clientContainer {
+        flex-direction: column;
+    }
+    .botList {
+        max-width: 100%;
+        margin-bottom: 2em;
+    }
+}
+@media (max-width: 600px) {
+    .clientContainer div {
+        margin: 0;
+    }
+    .infos h1, 
+    .infos h2 {
+        font-size: larger;
+    }
+    .trade p:nth-child(1) {
+        flex: 1;
+    }
+    .trade p:nth-child(4),
+    .trade p:nth-child(5) {
+        display: none;
+    }
+}

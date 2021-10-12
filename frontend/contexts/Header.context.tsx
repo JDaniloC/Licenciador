@@ -1,5 +1,4 @@
-import React, { createContext, ReactNode, useEffect, useState } from 'react';
-import Header from '../components/Header';
+import React, { createContext, ReactNode, useState } from 'react';
 
 interface HeaderContextData {
     changeDisplay: (string:string) => void;

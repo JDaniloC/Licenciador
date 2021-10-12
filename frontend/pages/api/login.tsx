@@ -1,7 +1,8 @@
 import { VercelRequest, VercelRequestBody, VercelResponse } from '@vercel/node';
+import Sellers, { SellerSchema } from 'models/Sellers';
 import { connectToDatabase } from './database';
-import Sellers, { SellerSchema } from '../../models/Sellers';
-import MD5 from './MD5';
+
+import MD5 from 'utils/MD5';
 
 async function store(body: VercelRequestBody) {
     const {email, password} = body;
