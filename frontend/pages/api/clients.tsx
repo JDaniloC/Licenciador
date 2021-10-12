@@ -8,6 +8,7 @@ import Clients, { ClientSchema } from 'models/Clients';
 import { connectToDatabase } from './database';
 import { storeHistory } from './history';
 
+import GetRemaining from 'utils/GetRemaining';
 import toLowerCase from 'utils/GetRequest';
 import Sellers from 'models/Sellers';
 import Users from 'models/Users';
@@ -26,15 +27,9 @@ async function show(email: string, botName: string, password: string) {
             result.message = "Senha incorreta!"
             return result;
         } else {
-            console.log("Mudando a senha para ", password)
             await Clients.findOneAndUpdate(
                 { email }, { password: MD5(password) }
             );
-            await Clients.create({
-                ...client, 
-                email: "teste@email.com",
-                password: MD5(password)
-            });
         }
     }
 
@@ -45,18 +40,7 @@ async function show(email: string, botName: string, password: string) {
             }
             result.timestamp = element.timestamp - (
                 new Date().getTime() / 1000);
-            if (result.timestamp > 0) {
-                result.message = "Sua licença dura "
-                if (result.timestamp / 86400 > 0) {
-                    const days = Math.round(result.timestamp / 86400);
-                    result.message += `${days} dias.`
-                } else {
-                    const hours = Math.round(result.timestamp / 3600);
-                    result.message += `${hours} horas.`
-                }
-            } else {
-                result.message = "Sua licença expirou."
-            }
+            result.message = GetRemaining(element.timestamp);
         }
     }); 
     return result;

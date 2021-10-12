@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 interface Trade {
     botName: string,
     account: string,
-    balance: number,
     result: string,
     amount: number,
     infos: string,
@@ -13,7 +12,7 @@ interface Trade {
 export interface UserSchema {
     email: string,
     createdAt: Date,
-    realBalance: Number,
+    totalYield: Number,
     initialBalance: Number,
     additionalInfo: Object,
     trades: Array<Trade>
@@ -22,7 +21,6 @@ export interface UserSchema {
 const TradeModel = new mongoose.Schema({
     botName: String,
     account: String,
-    balance: Number,
     result: String,
     amount: Number,
     infos: String,
@@ -32,7 +30,7 @@ const TradeModel = new mongoose.Schema({
 const UserModel = new mongoose.Schema({
     email: String,
     trades: [TradeModel],
-    realBalance: Number,
+    totalYield: Number,
     initialBalance: Number,
     additionalInfo: Object,
     createdAt: Date,

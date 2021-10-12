@@ -5,51 +5,57 @@ import {
     VercelResponse 
 } from '@vercel/node';
 
-import Clients, { ClientSchema } from '../../models/Clients';
-import Users, { UserSchema } from '../../models/Users';
-import Bots, { BotSchema } from '../../models/Bots';
-
+import Clients, { ClientSchema } from 'models/Clients';
+import Users, { UserSchema } from 'models/Users';
+import Bots, { BotSchema } from 'models/Bots';
 import { connectToDatabase } from './database';
-import toLowerCase from './utils';
+
+import GetRemaining from 'utils/GetRemaining';
+import toLowerCase from 'utils/GetRequest';
+
+const MAX_TRADES = 10;
 
 async function show(email: string) {
     const user = await Users.findOne({ email }) as UserSchema;
     
-    if (user === null) {
+    if (!user) {
         return {}
     }
     const client = await Clients.findOne({ email }) as ClientSchema;
+    const botList = await Bots.find() as BotSchema[];
+    const licenses = []
 
-    const trades = [];
-    const botList: BotSchema[] = [];
-    
-    for (let index = 0; index < user.trades.length; index++) {
-        const element = user.trades[index];
-        let botFound = botList.filter(bot => (
-            bot.name === element.botName))
-        if (botFound.length === 0) {
-            const bot = await Bots.findOne({ 
-                botName: element.botName }) as BotSchema;
-            botList.push(bot);
-            botFound.push(bot);
-        }
+    for (let index = 0; index < client.license.length; index++) {
+        const license = client.license[index];
+        const botFound = botList.filter(bot => (
+            bot.name === license.botName));
 
-        const license = client.license.filter(license => (
-            license.botName === element.botName));
-
-        trades.push({
-            ...element,
+        if (botFound.length === 0) continue;
+        
+        licenses.push({
+            botName: license.botName,
+            botTitle: botFound[0].title,
             botImg: botFound[0].imageURL,
-            license: license[0].timestamp
-        })
+            remaining: GetRemaining(license.timestamp),
+        });
     }
-    return { ...user, trades }
+
+    return { 
+        licenses,
+        email: user.email, 
+        trades: user.trades, 
+        seller: client.seller,
+        createdAt: user.createdAt,
+        totalYield: user.totalYield, 
+        initialBalance: user.initialBalance,
+        additionalInfo: user.additionalInfo,
+    }
 }
 
 async function store(body: VercelRequestBody) {
     const { email } = toLowerCase(body);
 
-    if (email === null) {
+    if (!email) {
         return {}
     }
 
@@ -58,41 +64,47 @@ async function store(body: VercelRequestBody) {
 
     if (!user) { 
         const { 
-            realBalance, 
             initialBalance, 
             additionalInfo 
         } = toLowerCase(body);
 
-        if ([realBalance, initialBalance, additionalInfo ].filter(
-                item => item === null).length > 0) {
+        if (initialBalance === undefined) {
             return {}
         }
 
         return await Users.create({
-            email, realBalance,
+            email, 
+            totalYield: 0,
             initialBalance, 
             additionalInfo,
             createdAt: today
         });
     }
-    const { botName, account, balance, 
+    const { 
+        botName, account, 
         result, amount, infos 
     } = toLowerCase(body);
 
-    if ([botName, account, balance, 
-        result, amount, infos ].filter(
+    if ([botName, account, result, amount, infos ].filter(
             item => item === null).length > 0) {
         return {}
     }
 
     user.trades.push({
-        botName, account, balance, 
-        result, amount, infos,
+        infos: infos.toUpperCase(), 
+        botName, account,
+        result, amount, 
         date: today 
     });
-    return await Clients.updateOne({ email }, { 
-        trades: user.trades 
+    user.totalYield += amount
+    if (user.trades.length > MAX_TRADES) {
+        user.trades.splice(0, 1);
+    }
+    await Users.updateOne({ email }, { 
+        trades: user.trades,
+        totalYield: user.totalYield
     });
+    return user;
 }
 
 async function destroy(query: VercelRequestQuery) {
