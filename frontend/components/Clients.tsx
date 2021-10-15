@@ -1,14 +1,16 @@
 import styles from '../styles/components/Clients.module.css';
 import { HeaderContext } from '../contexts/Header.context';
-
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
+
 import Button from 'react-bootstrap/Button';
+import ReactPaginate from 'react-paginate';
 import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Head from 'next/head'
 import axios from 'axios';
 
+const PER_PAGE = 5;
 export interface Client {
     email: string;
     license: number;
@@ -18,12 +20,19 @@ export interface Client {
 export default function Clients() {
     const { botName, setLicenses } = useContext(HeaderContext);
 
-    const [email, setEmail] = useState("");
-    const [newEmail, setNewEmail] = useState("");
     const [licenseDays, setLicenseDays] = useState(1);
-    const [clientLicenses, setClientLicenses] = useState(0);
+    const [email, setEmail] = useState<string>("");
+
+    const [clientLicenses, setClientLicenses] = useState<number>(0);
+    const [newEmail, setNewEmail] = useState<string>("");
     const [clients, setClients] = useState<Client[]>([]);
-    
+
+    const [pageCount, setPageCount] = useState<number>(0);
+    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const [sortCriteria, setSortCriteria] = useState<string>("email");
+    const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
         const { data }: { data: Client[] } = await axios.get(
@@ -32,11 +41,24 @@ export default function Clients() {
             }
         });
         setClients(data);
+        setFilteredClients(data);
+        setPageCount(Math.ceil(data.length / PER_PAGE));
     }
 
     useEffect(() => {
         loadClients();
     }, [])
+    useEffect(() => {
+        if (searchTerm === "") {
+            setPageCount(Math.floor(clients.length / PER_PAGE));
+            return setFilteredClients(clients);
+        }
+        const filtered = clients.filter((client) => (
+            client.email.toLowerCase().indexOf(
+                searchTerm.toLowerCase()) !== -1))
+        setFilteredClients(filtered);
+        setPageCount(Math.floor(filtered.length / PER_PAGE));
+    }, [searchTerm, clients])
 
     function selectClient({ target }) {
         const value = target.value;
@@ -83,9 +105,10 @@ export default function Clients() {
         const { data } = await axios.post("/api/clients/", {
             sellerEmail: account.email, clientEmail: newEmail, botName
         })
-        console.log(data)
-        setClients(prev => [...prev, data]);
         setNewEmail("");
+        setClients(prevState => [...prevState, {
+            email: newEmail, license: 0, updateAt: data.since
+        }]);
     }
     
     async function deleteClient() {
@@ -109,11 +132,42 @@ export default function Clients() {
         const value = evt.target.value;
         setLicenseDays(value);
     }
+    
+    function searchUpdated(evt) {
+        setCurrentPage(0);
+        setSearchTerm(evt.target.value);
+    }
+    function handleChangeCriteria(evt) {
+        const criteria = evt.target.getAttribute('data-criteria');
+        setSortCriteria(criteria);
+    }
+    function handlePaginate(evt) {
+        setCurrentPage(evt.selected);
+    }
+
+    function orderTable() {
+        const start = currentPage * PER_PAGE;
+        const end = start + PER_PAGE;
+        if (sortCriteria === "email") {
+            return filteredClients.sort((a, b) => (
+                a.email.localeCompare(b.email)
+            )).slice(start, end);
+        } else if (sortCriteria === "license") {
+            return filteredClients.sort((a, b) => (
+                b.license - a.license
+            )).slice(start, end);
+        } else {
+            return filteredClients.sort((a, b) => (
+                a.updateAt.localeCompare(b.updateAt)
+            )).slice(start, end);
+        }
+    }
 
     return (<>
         <Head>
             <title> Licenciador | Clients </title>
         </Head>
+
         <h2 className = {styles.botName}>
             { botName.toUpperCase() }
         </h2>
@@ -159,17 +213,34 @@ export default function Clients() {
                 </form>
             </section>
         </section>
+        <input 
+            type = "text" 
+            value = {searchTerm} 
+            onChange={searchUpdated}
+            className = {styles.search}
+            placeholder = {"Buscar cliente..."}
+        />
+        
         <section className = {styles.clientList}>
             <Table hover>
                 <thead>
                     <tr>
-                        <th> E-mail </th>
-                        <th> Dias </th>
-                        <th> Desde </th>
+                        <th data-criteria = "email"
+                            onClick = {handleChangeCriteria}> 
+                            E-mail 
+                        </th>
+                        <th data-criteria = "license"
+                            onClick = {handleChangeCriteria}> 
+                            Dias 
+                        </th>
+                        <th data-criteria = "updateAt"
+                            onClick = {handleChangeCriteria}> 
+                            Desde 
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {clients.map((client) => (
+                    {orderTable().map((client) => (
                         <tr key = {client.email}>
                             <td> {client.email} </td>
                             <td> {client.license} </td>
@@ -183,6 +254,20 @@ export default function Clients() {
                     ))}
                 </tbody>
             </Table>
+            <ReactPaginate
+                previousLabel={'Anterior'}
+                nextLabel={'Próximo'}
+                breakLabel={'...'}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
+                pageCount={pageCount}
+                onPageChange={handlePaginate}
+                containerClassName={"pagination"}
+                previousLinkClassName={"pagination__link"}
+                nextLinkClassName={"pagination__link"}
+                disabledClassName={"pagination__link--disabled"}
+                activeClassName={"pagination__link--active"}
+            />
         </section>
     </>)    
 }

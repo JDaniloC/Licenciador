@@ -38,8 +38,44 @@ span.overlay {
   margin-bottom: 0.5em;
 }
 
-@media (max-width: 600px) {
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  cursor: pointer;
+  width: 80%;
+}
+
+.pagination a {
+  padding: 10px 2em;
+  border-radius: 5px;
+  border: 1px solid var(--bs-blue);
+  color: var(--bs-blue);
+  text-decoration: none;
+}
+
+.pagination__link {
+  font-weight: bold;
+}
+
+.pagination__link--active a {
+  color: #fff !important;
+  background: var(--bs-blue);
+}
+
+.pagination__link--disabled a {
+  color: rgb(198, 197, 202);
+  border: 1px solid rgb(198, 197, 202);
+}
+.pagination__link--disabled a {
+  color: rgb(198, 197, 202) !important;
+}
+@media (max-width: 750px) {
   .dashboard {
     flex-wrap: wrap;
+  }
+  .pagination {
+    width: 100% !important;
+    font-size: xx-small;
   }
 }

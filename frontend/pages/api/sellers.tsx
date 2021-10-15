@@ -4,10 +4,11 @@ import {
     VercelRequestQuery, 
     VercelResponse 
 } from '@vercel/node';
-import Sellers, { SellerSchema } from '../../models/Sellers';
+import Sellers, { SellerSchema } from 'models/Sellers';
 import { connectToDatabase } from './database';
 import { storeHistory } from './history';
-import toLowerCase from './utils';
+
+import toLowerCase from 'utils/GetRequest';
 
 async function index(query: VercelRequestQuery) {
     const { email } = toLowerCase(query);

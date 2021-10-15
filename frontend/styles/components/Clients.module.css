@@ -17,6 +17,21 @@
 .clients form * {
     padding: 1em;
 }
+
+.search {
+    min-height: 2em;
+    width: clamp(10em, 25em, 30em);
+    margin: 1em;
+}
+
+.clientList {
+    width: 90%;
+    margin-left: 10%;
+}
+.clientList tr th {
+    cursor: pointer;
+}
+
 .clientSettings {
     margin: 1em;
 }
@@ -25,7 +40,6 @@
     flex-direction: column;
     width: 25em;
 }
-
 .clientSettings form * {
     text-align: center;
     padding: 1em;
@@ -41,4 +55,32 @@
     padding: 20px;
     width: 100%;
     margin-top: 0;
+}
+
+@media (max-width: 750px) {
+    .clientList {
+        width: 100%;
+        margin-left: 0em;
+    }
+}
+@media (max-width: 500px) {
+    .clientList {
+        font-size: smaller;
+    }
+}
+@media (max-width: 400px) {
+    .clientSettings * {
+        padding: 1em 10px !important;
+    }
+    .clientSettings form {
+        max-width: 100%;
+    }
+    .clientSettings,
+    .search {
+        margin: 1em 0;
+        max-width: 100vw;
+    }
+    .clientList td:nth-child(3) {
+        display: none;
+    }
 }

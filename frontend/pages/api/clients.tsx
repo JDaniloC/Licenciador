@@ -4,20 +4,43 @@ import {
     VercelRequestQuery, 
     VercelResponse 
 } from '@vercel/node';
-import Clients, { ClientSchema } from '../../models/Clients';
-import { storeHistory } from './history';
+import Clients, { ClientSchema } from 'models/Clients';
 import { connectToDatabase } from './database';
-import Sellers from '../../models/Sellers';
-import toLowerCase from './utils';
+import { storeHistory } from './history';
 
-async function show(email: string, botName: string) {
-    const result = {};
+import GetRemaining from 'utils/GetRemaining';
+import toLowerCase from 'utils/GetRequest';
+import Sellers from 'models/Sellers';
+import Users from 'models/Users';
+import MD5 from 'utils/MD5';
+
+async function show(email: string, botName: string, password: string) {
+    const result = { timestamp: 0, message: "Compre uma licença!" };
     const client = await Clients.findOne({ email }) as ClientSchema;
+
+    if (client === null) {
+        throw new Error('Client not found');
+    }
+
+    if (password !== undefined && client.password !== MD5(password)) {
+        if (client.password) {
+            result.message = "Senha incorreta!"
+            return result;
+        } else {
+            await Clients.findOneAndUpdate(
+                { email }, { password: MD5(password) }
+            );
+        }
+    }
+
     client.license.forEach(element => {
         if (element.botName === botName) {
-            result[email] = {
+            result[email] = { // deprecated
                 timestamp: element.timestamp
             }
+            result.timestamp = element.timestamp - (
+                new Date().getTime() / 1000);
+            result.message = GetRemaining(element.timestamp);
         }
     }); 
     return result;
@@ -58,11 +81,11 @@ async function index(email: string, botName: string) {
 }
 
 async function getClient(query: VercelRequestQuery) {
-    const { email, botName, isSeller } = toLowerCase(query);
+    const { email, botName, isSeller, password } = toLowerCase(query);
     if (isSeller) {
         return await index(email, botName);
     } else {
-        return await show(email, botName);
+        return await show(email, botName, password);
     }
 }
 
@@ -135,6 +158,7 @@ async function destroy(query: VercelRequestQuery) {
         }
 
         await Clients.findOneAndDelete({ email });
+        await Users.findOneAndDelete({ email });
 
         storeHistory(seller, `Deleted the ${email} client.`)
     }

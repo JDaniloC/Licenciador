@@ -24,10 +24,10 @@ export default function Header() {
             <h1> Licenciador </h1>
             <div>
                 <p id = "licenseNumber"> {licenses} </p>
-                <img src="https://i.pinimg.com/originals/c1/2d/c5/c12dc536b8f8797b629eb9942a2dbbf1.gif"/>
+                <img src="/coin.gif"/>
             </div>
             <button style = {{ opacity: 1 }} onClick = {closeAccount}>
-                <img src="https://i.ibb.co/dkd6LYY/shutdown.png" alt="exit image"/>
+                <img src="/shutdown.png" alt="exit image"/>
             </button>
         </header>
     )

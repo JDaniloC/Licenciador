@@ -1,9 +1,10 @@
 import { VercelRequest, VercelRequestBody, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './database';
-import Clients from '../../models/Clients';
-import Sellers from '../../models/Sellers';
 import { storeHistory } from './history';
-import toLowerCase from './utils';
+
+import toLowerCase from 'utils/GetRequest';
+import Clients from 'models/Clients';
+import Sellers from 'models/Sellers';
 
 async function store(body: VercelRequestBody) {
     const { sellerEmail, clientEmail,

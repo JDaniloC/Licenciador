@@ -11,13 +11,15 @@ export interface ClientSchema {
     seller: string,
     license: Array<License>,
     updateTime: Date
+    password: string;
 }
 
 const ClientModel = new mongoose.Schema({
     email: String,
     seller: String,
     license: Array,
-    updateTime: Date
+    updateTime: Date,
+    password: String
 });
 
 export default mongoose.models.Client || 
