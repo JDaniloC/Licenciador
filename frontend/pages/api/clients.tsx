@@ -96,7 +96,8 @@ async function store(body: VercelRequestBody) {
         return {}
     }
 
-    let client = await Clients.findOne({ email: clientEmail }) as ClientSchema; 
+    let client = await Clients.findOne(
+        { email: clientEmail }) as ClientSchema; 
     const today = new Date().getTime();
 
     if (!client) { 

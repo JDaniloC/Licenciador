@@ -13,7 +13,7 @@ export interface Trade {
 export interface UserSchema {
     email: string,
     createdAt: Date,
-    totalYield: Number,
+    totalYield: number,
     initialBalance: Number,
     additionalInfo: Object,
     trades: Array<Trade>
