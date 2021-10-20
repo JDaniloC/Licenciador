@@ -60,15 +60,27 @@ async function store(body: VercelRequestBody) {
 
     const user = await Users.findOne({ email }) as UserSchema; 
     const today = new Date();
-
+    
     if (!user) { 
         const { 
             initialBalance, 
-            additionalInfo 
+            additionalInfo,
+            account
         } = toLowerCase(body);
 
-        if (initialBalance === undefined) {
+        if (initialBalance === undefined ||
+            account == undefined) {
             return {}
+        }
+
+        if (account !== "real") {
+            return await Users.create({
+                email, 
+                totalYield: 0,
+                additionalInfo,
+                createdAt: today,
+                initialBalance: 0, 
+            });
         }
 
         return await Users.create({
@@ -81,27 +93,36 @@ async function store(body: VercelRequestBody) {
     }
     const { 
         botName, account, 
-        result, amount, infos 
+        result, amount, infos,
+        initialBalance: newBalance,
     } = toLowerCase(body);
 
     if ([botName, account, result, amount, infos ].filter(
-            item => item === null).length > 0) {
+            item => item === undefined).length > 0) {
         return {}
+    }
+
+    let initialBalance = user.initialBalance;
+    if (user.initialBalance === 0 
+        && account === "real" &&
+        newBalance !== undefined)  {
+        initialBalance = newBalance
     }
 
     const { title: botTitle } = await Bots.findOne({ name: botName });
     user.trades.push({
         botName, result, botTitle,
-        amount: amount.toFixed(2), 
         infos: infos.toUpperCase(), 
+        amount: parseFloat(amount), 
         account: account.toUpperCase(), 
-        date: today.toLocaleString("pt-BR")
+        date: today.toLocaleString("pt-BR"),
     });
-    user.totalYield += amount
+    user.totalYield += parseFloat(amount);
     if (user.trades.length > MAX_TRADES) {
         user.trades.splice(0, 1);
     }
     await Users.updateOne({ email }, { 
+        initialBalance,
         trades: user.trades,
         totalYield: user.totalYield
     });

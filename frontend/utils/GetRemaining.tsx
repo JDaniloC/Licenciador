@@ -13,17 +13,23 @@ export default function GetRemaining(milliseconds: number): string {
         const seconds = timestamp % 60
 
         if (years > 0) {
-            return `${message} ${years} anos.`
+            const plural = years > 1 ? "s" : "";
+            return `${message} ${years} ano${plural}.`
         } else if (months > 0) {
-            return `${message} ${months} meses.`
+            const plural = years > 1 ? "meses" : "mês";
+            return `${message} ${months} ${plural}.`
         } else if (days > 0) {
-            return `${message} ${days} dias.`
+            const plural = years > 1 ? "s" : "";
+            return `${message} ${days} dia${plural}.`
         } else if (hours > 0) {
-            return `${message} ${hours} horas.`
+            const plural = years > 1 ? "s" : "";
+            return `${message} ${hours} hora${plural}.`
         } else if (minutes > 0) {
-            return `${message} ${minutes} minutos.`
+            const plural = years > 1 ? "s" : "";
+            return `${message} ${minutes} minuto${plural}.`
         } else {
-            return `${message} ${seconds} segundos.`
+            const plural = years > 1 ? "s" : "";
+            return `${message} ${seconds} segundo${plural}.`
         }
     } 
     return message;

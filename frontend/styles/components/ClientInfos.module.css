@@ -18,7 +18,7 @@
     font-size: 1.3em;
     display: flex;
     text-align: start;
-    border: solid 1px #CCC;
+    border: solid 3px #CCC;
 }
 .trade p {
     flex: 1 1;
