@@ -173,8 +173,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     
     switch (req.method) {
         case "GET":
-            const response = await getClient(req.query);
-            res.status(200).json(response);
+            try { 
+                const response = await getClient(req.query);
+                res.status(200).json(response);
+            } catch {
+                res.status(404).json({ error: "Client not found" })
+            }
             break;
         case "POST":
             const newClient = await store(req.body);
