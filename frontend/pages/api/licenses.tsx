@@ -19,10 +19,11 @@ async function store(body: VercelRequestBody) {
     const seller = await Sellers.findOne({ email: sellerEmail });
     const client = await Clients.findOne({ email: clientEmail });
     const result = {
-        updateTime: new Date(client.updateTime).toLocaleString("pt-BR"),
+        updateAt: new Date(client.updateTime).toLocaleString("pt-BR"),
         licenses: seller.licenses,
         tests: seller.tests,
-        time: 0
+        email: clientEmail,
+        license: 0,
     }
     
     if (!client || seller.botList.indexOf(botName) === -1) {
@@ -45,7 +46,7 @@ async function store(body: VercelRequestBody) {
         if (bot.botName === botName) {
             foundBot = true;
             bot.timestamp = agora + 86400 * daysToAdd;
-            result.time = daysToAdd;
+            result.license = daysToAdd;
         }
     })
     if (!foundBot) {
@@ -53,10 +54,10 @@ async function store(body: VercelRequestBody) {
             botName: botName,
             timestamp: agora + 86400 * daysToAdd
         })
-        result.time = daysToAdd;
+        result.license = daysToAdd;
     }
     
-    result.updateTime = new Date(today).toLocaleString("pt-BR");
+    result.updateAt = new Date(today).toLocaleString("pt-BR");
     await Sellers.findOneAndUpdate(
         {email: sellerEmail}, {
             licenses: result.licenses,
