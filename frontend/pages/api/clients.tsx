@@ -132,9 +132,15 @@ async function store(body: VercelRequestBody) {
         }
     }
 
+    const updateString = new Date(today).toLocaleString("pt-BR");
     return {
+        license: 0,
+        email: clientEmail,
+        updateAt: updateString,
+        
+        // deprecated
         seller: sellerEmail,
-        since: today,
+        since: today, 
         licenses: {
             [botName]: 0
         }

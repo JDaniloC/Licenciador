@@ -84,16 +84,16 @@ export default function Clients() {
         newAccount['tests'] = data.tests;
 
         const newClients = clients.map(client => {
-            if (client.email === email) {
-                client.license = data.time;
-                client.updateAt = data.updateTime;
+            if (client.email === data.email) {
+                client.license = data.license;
+                client.updateAt = data.updateAt;
             }
             return client;
         })
         localStorage.setItem("account", JSON.stringify(newAccount))
         
         setClients(newClients);
-        setClientLicenses(data.time);
+        setClientLicenses(data.license);
         if (isTest) {
             setTests(data.tests)
         } else {
@@ -107,9 +107,7 @@ export default function Clients() {
             sellerEmail: account.email, clientEmail: newEmail, botName
         })
         setNewEmail("");
-        setClients(prevState => [...prevState, {
-            email: newEmail, license: 0, updateAt: data.since
-        }]);
+        setClients(prevState => [...prevState, data]);
     }
     
     async function deleteClient() {
