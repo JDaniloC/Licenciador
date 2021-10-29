@@ -8,8 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@types/jsonwebtoken": "^8.5.5",
     "axios": "^0.21.2",
     "bootstrap": "5.0.2",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.12",
     "next": "11.1.2",
     "react": "17.0.2",
