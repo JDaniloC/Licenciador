@@ -9,29 +9,19 @@ import { connectToDatabase } from './database';
 import { storeHistory } from './history';
 
 import toLowerCase from 'utils/GetRequest';
+import verifyRole from 'utils/verifyRole';
 
-async function index(query: VercelRequestQuery) {
-    const { email } = toLowerCase(query);
-
-    const creator = await Sellers.findOne({ email }) as SellerSchema;
-    if (!creator || creator.type !== "admin") {
-        return {};
-    }
-
+async function index() {
     const allSellers = await Sellers.find();
     return allSellers;
 }
 
 async function store(body: VercelRequestBody) {
-    let { creatorEmail, sellerEmail, 
-        tests, botList, showBots 
+    let { 
+        creatorEmail,
+        sellerEmail, tests, 
+        botList, showBots 
     } = toLowerCase(body);
-
-    const creator = await Sellers.findOne(
-        { email: creatorEmail }) as SellerSchema;
-    if (!creator || creator.type !== "admin") {
-        return {};
-    }
 
     let seller = await Sellers.findOne(
         { email: sellerEmail }) as SellerSchema; 
@@ -68,14 +58,7 @@ async function destroy(query: VercelRequestQuery) {
         return { "error": "Missing params: email, creatorEmail" };
     }
 
-    const creator = await Sellers.findOne({ email: creatorEmail });
-
-    if (!creator || creator.type !== "admin") {
-        return {};
-    }
-
     const seller = await Sellers.findOneAndDelete({email});
-
     storeHistory(creatorEmail as string, `Deleted ${email} seller.`)
     return seller;
 }
@@ -83,9 +66,15 @@ async function destroy(query: VercelRequestQuery) {
 export default async (req: VercelRequest, res: VercelResponse) => {
     await connectToDatabase();
     
+    const isAdmin = await verifyRole(req, ["admin"]);
+    if (!isAdmin) {
+        return res.status(403).json({ 
+            error: "UNAUTHORIZED." });
+    }
+
     switch (req.method) {
         case "GET":
-            const allSellers = await index(req.query);
+            const allSellers = await index();
             res.status(200).json(allSellers);
             break;
     

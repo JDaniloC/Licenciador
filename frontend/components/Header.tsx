@@ -1,7 +1,8 @@
 import { useContext } from 'react';
-import { HeaderContext } from '../contexts/Header.context';
-import { RouterContext} from '../contexts/Router.context';
-import styles from '../styles/components/Header.module.css';
+import { HeaderContext } from 'contexts/Header.context';
+import { RouterContext} from 'contexts/Router.context';
+
+import styles from 'styles/components/Header.module.css';
 
 export default function Header() {
     const { changeDisplay, setCanBack, 

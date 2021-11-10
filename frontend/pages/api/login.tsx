@@ -8,20 +8,7 @@ import { connectToDatabase } from './database';
 
 import MD5 from 'utils/MD5';
 import jwt  from "jsonwebtoken";
-
-function verifyJWT(request: VercelRequest, response: VercelResponse){
-    const token = request.headers.authorization;
-    if (!token) return response.status(401).json(
-        { auth: false, message: 'No token provided.' });
-    
-    jwt.verify(token, process.env.SECRET, function(err, decoded) {
-        if (err) return response.status(500).json(
-            { auth: false, message: 'Failed to authenticate token.' });
-        
-        response.status(200).json(
-            { auth: true, message: 'Authenticated' });
-    });
-}
+import verifyToken from 'utils/VerifyToken';
 
 async function store(body: VercelRequestBody) {
     const { email, password } = body;
@@ -33,20 +20,28 @@ async function store(body: VercelRequestBody) {
     }
     const account = await Sellers.findOne({ email }) as SellerSchema;
     const encrypted = MD5(password);
-    let result = { token: null };
+    let result = null;
     if (account) {
         const token = jwt.sign({ email }, process.env.SECRET, {
             expiresIn: 60 * 60 // expires in 1 hour
         });
         if (account.password) {
             if (account.password === encrypted) {
-                result.token = token;
+                result = { 
+                    token, email: account.email, type: account.type,
+                    botList: account.botList, showBots: account.showBots,
+                    tests: account.tests, licenses: account. licenses,
+                };
             }
         } else {
             await Sellers.findOneAndUpdate(
                 { email }, {password: encrypted}
             );
-            result.token = token;
+            result = { 
+                token, email: account.email, type: account.type,
+                botList: account.botList, showBots: account.showBots,
+                tests: account.tests, licenses: account. licenses,
+            };
         }
     }
 
@@ -58,7 +53,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     
     switch (req.method) {
         case "GET":
-            await verifyJWT(req, res);
+            const isAuth = verifyToken(req);
+            if (isAuth.auth) {
+                res.status(200).json(isAuth);
+            } else {
+                res.status(401).json(isAuth);
+            }
             break;
 
         case "POST":

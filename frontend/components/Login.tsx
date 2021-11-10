@@ -1,9 +1,10 @@
-import styles from '../styles/components/Login.module.css';
-import { HeaderContext } from '../contexts/Header.context';
-import { RouterContext } from '../contexts/Router.context';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { HeaderContext } from 'contexts/Header.context';
+import { RouterContext } from 'contexts/Router.context';
+
 import Head from 'next/head'
-import axios from 'axios';
+import axios from 'services/api';
+import styles from 'styles/components/Login.module.css';
 
 export interface LoginData {
     data: {
@@ -63,6 +64,7 @@ export default function Login() {
             shakeInput(passwordRef.current);   
         } else {
             data["since"] = new Date().getTime();
+            axios.defaults.headers.common['Authorization'] = data.token;
             localStorage.setItem('account', 
                 JSON.stringify(data));
             removeLoginComponent()
@@ -76,8 +78,8 @@ export default function Login() {
         
         if (difference > 3600) {
             const { data } = await axios.get("/api/login", { 
-                headers: { authorization: account.token }}
-            ).catch((err) => {
+                headers: { authorization: account.token } 
+            }).catch((err) => {
                 console.error(err)
                 return { data: {
                     auth: false, message: "Server error",
