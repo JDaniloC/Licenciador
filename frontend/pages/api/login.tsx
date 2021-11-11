@@ -30,7 +30,7 @@ async function store(body: VercelRequestBody) {
                 result = { 
                     token, email: account.email, type: account.type,
                     botList: account.botList, showBots: account.showBots,
-                    tests: account.tests, licenses: account. licenses,
+                    licenses: account. licenses,
                 };
             }
         } else {
@@ -40,7 +40,7 @@ async function store(body: VercelRequestBody) {
             result = { 
                 token, email: account.email, type: account.type,
                 botList: account.botList, showBots: account.showBots,
-                tests: account.tests, licenses: account. licenses,
+                licenses: account. licenses,
             };
         }
     }
