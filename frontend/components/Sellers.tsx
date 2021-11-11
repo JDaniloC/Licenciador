@@ -1,9 +1,9 @@
-import styles from '../styles/components/Sellers.module.css';
-import { HeaderContext } from '../contexts/Header.context';
-import { useContext, useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
+import { useEffect, useState } from 'react';
+
 import Head from 'next/head'
-import axios from 'axios';
+import axios from 'services/api';
+import Button from 'react-bootstrap/Button';
+import styles from 'styles/components/Sellers.module.css';
 
 interface Bot {
     _id: string,
@@ -23,8 +23,6 @@ export interface SellersData {
 }
 
 export default function Clients({ bots }: { bots: Bot[] }) {
-    const { } = useContext(HeaderContext);
-
     const [sellers, setSellers] = useState({});
     const [email, setEmail] = useState("");
     const [licenses, setLicenses] = useState("");

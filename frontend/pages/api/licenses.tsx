@@ -3,6 +3,8 @@ import { connectToDatabase } from './database';
 import { storeHistory } from './history';
 
 import toLowerCase from 'utils/GetRequest';
+import verifyRole from 'utils/verifyRole';
+
 import Clients from 'models/Clients';
 import Sellers from 'models/Sellers';
 
@@ -18,9 +20,11 @@ async function store(body: VercelRequestBody) {
     const seller = await Sellers.findOne({ email: sellerEmail });
     const client = await Clients.findOne({ email: clientEmail });
     const result = {
-        updateTime: new Date(client.updateTime).toLocaleString("pt-BR"),
+        updateAt: new Date(client.updateTime).toLocaleString("pt-BR"),
         licenses: seller.licenses,
-        time: 0
+        tests: seller.tests,
+        email: clientEmail,
+        license: 0,
     }
     
     if (!client || seller.botList.indexOf(botName) === -1) {
@@ -36,7 +40,7 @@ async function store(body: VercelRequestBody) {
         if (bot.botName === botName) {
             foundBot = true;
             bot.timestamp = agora + 86400 * licenseDays;
-            result.time = licenseDays;
+            result.license = licenseDays;
         }
     })
     if (!foundBot) {
@@ -44,10 +48,10 @@ async function store(body: VercelRequestBody) {
             botName: botName,
             timestamp: agora + 86400 * licenseDays
         })
-        result.time = licenseDays;
+        result.license = licenseDays;
     }
     
-    result.updateTime = new Date(today).toLocaleString("pt-BR");
+    result.updateAt = new Date(today).toLocaleString("pt-BR");
     await Sellers.findOneAndUpdate(
         {email: sellerEmail}, {
             licenses: result.licenses
@@ -67,6 +71,12 @@ async function store(body: VercelRequestBody) {
 export default async (req: VercelRequest, res: VercelResponse) => {
     await connectToDatabase();
     
+    const isAdmin = await verifyRole(req, ["seller"]);
+    if (!isAdmin) {
+        return res.status(403).json({ 
+            error: "UNAUTHORIZED." });
+    }
+
     switch (req.method) {
         case "POST":
             const result = await store(req.body);

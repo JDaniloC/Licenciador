@@ -1,6 +1,7 @@
-import styles from 'styles/components/ClientInfos.module.css';
 import { useContext } from 'react';
 import { UserContext } from 'contexts/User.context';
+
+import styles from 'styles/components/ClientInfos.module.css';
 
 export default function ClientSearch() {
     const { 

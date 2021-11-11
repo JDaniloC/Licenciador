@@ -1,8 +1,8 @@
 import React, { createContext, ReactNode, useState } from 'react';
-import BotList from '../components/BotList';
-import Clients from '../components/Clients';
-import Login from '../components/Login';
-import Sellers from '../components/Sellers';
+import BotList from 'components/BotList';
+import Clients from 'components/Clients';
+import Sellers from 'components/Sellers';
+import Login from 'components/Login';
 
 interface RouterContextData {
     setRoute: (route:string) => void;

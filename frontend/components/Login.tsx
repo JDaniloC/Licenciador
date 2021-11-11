@@ -1,15 +1,16 @@
-import styles from '../styles/components/Login.module.css';
-import { HeaderContext } from '../contexts/Header.context';
-import { RouterContext } from '../contexts/Router.context';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { HeaderContext } from 'contexts/Header.context';
+import { RouterContext } from 'contexts/Router.context';
+
 import Head from 'next/head'
-import axios from 'axios';
+import axios from 'services/api';
+import styles from 'styles/components/Login.module.css';
 
 export interface LoginData {
     data: {
         botList: []
         email: string;
-        password: string;
+        token: string;
         type: string;
     }
 }
@@ -31,7 +32,7 @@ export default function Login() {
     
     useEffect(() => {
         if (localStorage.getItem("account")) {
-            removeLogin();
+            removeLoginComponent();
         }
     })
 
@@ -51,29 +52,54 @@ export default function Login() {
             console.error(err)
             return { data: {
                 email: undefined,
-                password: undefined,
                 botList: undefined,
                 type: undefined,
+                token: null
             } }
         })
 
-        if (data.type === undefined) {
+        if (!data.token) {
             shakeInput(emailRef.current);
             shakeInput(passwordRef.current);   
         } else {
-            localStorage.setItem(
-                'account', JSON.stringify(data));
-            removeLogin()
+            data["since"] = new Date().getTime();
+            axios.defaults.headers.common['Authorization'] = data.token;
+            localStorage.setItem('account', 
+                JSON.stringify(data));
+            removeLoginComponent()
         }
     }
 
-    function removeLogin() {
-        changeDisplay("none");
-        
+    async function verifyAuthentication() {
         const account = JSON.parse(localStorage.getItem('account'));
+        const todayTime = new Date().getTime()
+        const difference = (todayTime - account["since"]) / 1000;
         
-        
-        if (account.type == "admin") {
+        if (difference > 3600) {
+            const { data } = await axios.get("/api/login", { 
+                headers: { authorization: account.token } 
+            }).catch((err) => {
+                console.error(err)
+                return { data: {
+                    auth: false, message: "Server error",
+                } }
+            })
+            
+            if (!data.auth) {
+                localStorage.removeItem('account');
+                localStorage.removeItem('bot');
+                return
+            }
+        }
+        return account;
+    }
+
+    async function removeLoginComponent() {
+        const account = await verifyAuthentication();
+        if (account === undefined) return
+
+        changeDisplay("none");
+        if (account.type === "admin") {
             setRoute("sellers");
         } else {
             setLicenses(account.licenses);

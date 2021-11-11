@@ -1,5 +1,6 @@
 .clientContainer {
     display: flex;
+    max-width: 100vw;
 }
 .clientContainer div {
     margin: 2em;
@@ -34,9 +35,11 @@
 }
 .trade[data-result="win"] {
     border-color: green;
+    background-color: #d7ffd7;
 }
 .trade[data-result="loss"] {
     border-color: red;
+    background-color: #ffe2e2;
 }
 
 .trade p[data-account="DEMO"] {

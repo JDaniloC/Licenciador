@@ -1,14 +1,14 @@
-import styles from '../styles/components/Clients.module.css';
-import { HeaderContext } from '../contexts/Header.context';
 import React, { useContext, useEffect, useState } from 'react';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
+import { HeaderContext } from 'contexts/Header.context';
 
 import Button from 'react-bootstrap/Button';
 import ReactPaginate from 'react-paginate';
 import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Head from 'next/head'
-import axios from 'axios';
+import axios from 'services/api';
+import styles from 'styles/components/Clients.module.css';
 
 const PER_PAGE = 5;
 export interface Client {
@@ -83,13 +83,11 @@ export default function Clients() {
         })
        
         newAccount['licenses'] = data.licenses;
-        let foundClient = false;
 
         const newClients = clients.map(client => {
-            if (client.email === email) {
-                client.license = data.time;
-                client.updateAt = data.updateTime;
-                foundClient = true;
+            if (client.email === data.email) {
+                client.license = data.license;
+                client.updateAt = data.updateAt;
             }
             return client;
         })
@@ -97,7 +95,7 @@ export default function Clients() {
         
         setClients(newClients);
         setLicenses(data.licenses);
-        setClientLicenses(data.time);
+        setClientLicenses(data.license);
     }
 
     async function createClient() {
@@ -106,9 +104,7 @@ export default function Clients() {
             sellerEmail: account.email, clientEmail: newEmail, botName
         })
         setNewEmail("");
-        setClients(prevState => [...prevState, {
-            email: newEmail, license: 0, updateAt: data.since
-        }]);
+        setClients(prevState => [...prevState, data]);
     }
     
     async function deleteClient() {

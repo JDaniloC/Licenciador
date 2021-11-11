@@ -1,15 +1,16 @@
 import { GetServerSideProps } from 'next';
-import Head from 'next/head'
+
 import axios from 'axios';
+import Head from 'next/head'
+
+import Header from 'components/Header';
+import styles from 'styles/Home.module.css';
+
+import { serverURL } from 'config';
+import { HeaderProvider } from 'contexts/Header.context';
+import { RouterProvider } from 'contexts/Router.context';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import styles from '../styles/Home.module.css';
-
-import { HeaderProvider } from '../contexts/Header.context';
-import { RouterProvider } from '../contexts/Router.context';
-
-import Header from '../components/Header';
-import { serverURL } from '../config';
 
 export default function Home({ bots }) {
   return (

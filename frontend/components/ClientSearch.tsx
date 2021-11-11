@@ -1,7 +1,8 @@
-import styles from 'styles/components/ClientSearch.module.css';
 import { useRef, useState, useContext } from 'react';
 import { UserContext } from 'contexts/User.context';
-import axios from 'axios';
+
+import axios from 'services/api';
+import styles from 'styles/components/ClientSearch.module.css';
 
 export default function ClientSearch() {
     const [email, setEmail] = useState("");
