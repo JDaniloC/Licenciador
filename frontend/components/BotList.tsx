@@ -1,8 +1,9 @@
-import styles from '../styles/components/BotList.module.css';
-import { HeaderContext } from '../contexts/Header.context';
-import { RouterContext } from '../contexts/Router.context';
 import { useContext, useEffect, useState } from 'react';
+import { HeaderContext } from 'contexts/Header.context';
+import { RouterContext } from 'contexts/Router.context';
+
 import Head from 'next/head'
+import styles from 'styles/components/BotList.module.css';
 
 interface Bot {
     _id: string,

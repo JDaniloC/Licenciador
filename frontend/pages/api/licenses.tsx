@@ -3,6 +3,8 @@ import { connectToDatabase } from './database';
 import { storeHistory } from './history';
 
 import toLowerCase from 'utils/GetRequest';
+import verifyRole from 'utils/verifyRole';
+
 import Clients from 'models/Clients';
 import Sellers from 'models/Sellers';
 
@@ -78,6 +80,12 @@ async function store(body: VercelRequestBody) {
 export default async (req: VercelRequest, res: VercelResponse) => {
     await connectToDatabase();
     
+    const isAdmin = await verifyRole(req, ["seller"]);
+    if (!isAdmin) {
+        return res.status(403).json({ 
+            error: "UNAUTHORIZED." });
+    }
+
     switch (req.method) {
         case "POST":
             const result = await store(req.body);

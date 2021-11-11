@@ -5,6 +5,7 @@ import {
 } from '@vercel/node';
 
 import { connectToDatabase } from './database';
+import verifyRole from 'utils/verifyRole';
 import Bots from 'models/Bots';
 
 async function store(body: VercelRequestBody) {
@@ -22,33 +23,45 @@ async function store(body: VercelRequestBody) {
     return bot;
 }
 
-async function destroy(body: VercelRequestBody) {
+async function destroy(body: VercelRequestBody, 
+                       res: VercelResponse) {
     const { name } = body;
-    return await Bots.findOneAndDelete({ name });
+
+    const deletedBot = await Bots.findOneAndDelete({ name })
+    res.status(200).json(deletedBot);
 }
 
 export default async (
     req: VercelRequest, 
-    res: VercelResponse) => {
+    res: VercelResponse
+) => {
     await connectToDatabase();
+    
+    if (req.method === "GET") {
+        const { name } = req.query;
+        if (name) {
+            const bot = await Bots.findOne({ name }); 
+            return res.status(200).json(bot);
+        } else {
+            const bots = await Bots.find();
+            return res.status(200).json(bots);
+        }
+    }
 
+    const isAdmin = await verifyRole(
+        req, ["admin", "seller"]);
+    if (!isAdmin) {
+        return res.status(403).json({ 
+            error: "UNAUTHORIZED." });
+    }
+    
     switch (req.method) {
-        case "GET":
-            const { name } = req.query;
-            if (name) {
-                const bot = await Bots.findOne({ name }); 
-                res.status(200).json(bot);
-            } else {
-                const bots = await Bots.find();
-                res.status(200).json(bots);
-            }
-            break;
         case "POST":
             const bot = await store(req.body);
             res.status(200).json(bot);
             break;
         case "DELETE":
-            res.status(200).json(destroy(req.body));
+            await destroy(req.body, res);
             break
         default:
             res.status(404).json(

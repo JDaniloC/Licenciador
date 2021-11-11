@@ -1,13 +1,13 @@
-import styles from '../styles/components/Clients.module.css';
-import { HeaderContext } from '../contexts/Header.context';
 import React, { useContext, useEffect, useState } from 'react';
+import { HeaderContext } from 'contexts/Header.context';
 
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import ReactPaginate from 'react-paginate';
 
 import Head from 'next/head'
-import axios from 'axios';
+import axios from 'services/api';
+import styles from 'styles/components/Clients.module.css';
 
 const PER_PAGE = 5;
 export interface Client {

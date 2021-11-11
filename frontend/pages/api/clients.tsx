@@ -10,6 +10,7 @@ import { storeHistory } from './history';
 
 import GetRemaining from 'utils/GetRemaining';
 import toLowerCase from 'utils/GetRequest';
+import verifyRole from 'utils/verifyRole';
 import Sellers from 'models/Sellers';
 import Users from 'models/Users';
 import MD5 from 'utils/MD5';
@@ -80,9 +81,13 @@ async function index(email: string, botName: string) {
     return result;
 }
 
-async function getClient(query: VercelRequestQuery) {
-    const { email, botName, isSeller, password } = toLowerCase(query);
+async function getClient(req: VercelRequest) {
+    const { email, botName, isSeller, password } = toLowerCase(req.query);
     if (isSeller) {
+        const isAdmin = await verifyRole(req, ["seller"]);
+        if (!isAdmin) {
+            throw new Error("Unauthorized");
+        }
         return await index(email, botName);
     } else {
         return await show(email, botName, password);
@@ -177,15 +182,25 @@ async function destroy(query: VercelRequestQuery) {
 export default async (req: VercelRequest, res: VercelResponse) => {
     await connectToDatabase();
     
-    switch (req.method) {
-        case "GET":
-            try { 
-                const response = await getClient(req.query);
-                res.status(200).json(response);
-            } catch {
-                res.status(404).json({ error: "Client not found" })
+    if (req.method === "GET") {
+        try { 
+            const response = await getClient(req);
+            return res.status(200).json(response);
+        } catch (e) {
+            if (e instanceof Error) {
+                return res.status(401).json({ error: "UNAUTHORIZED." });
             }
-            break;
+            return res.status(404).json({ error: "Client not found" });
+        } 
+    }
+
+    const isAdmin = await verifyRole(req, ["seller"]);
+    if (!isAdmin) {
+        return res.status(403).json({ 
+            error: "UNAUTHORIZED." });
+    }
+
+    switch (req.method) {
         case "POST":
             const newClient = await store(req.body);
             res.status(200).json(newClient);
