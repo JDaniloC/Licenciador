@@ -34,14 +34,16 @@ export default function Clients() {
 
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data }: { data: Client[] } = await axios.get(
-            "/api/clients/", { params: {
-                email: account.email, botName, isSeller: true
-            }
-        }).catch(() => ({ data: [] as Client[] }));
-        setClients(data);
-        setFilteredClients(data);
-        setPageCount(Math.ceil(data.length / PER_PAGE));
+        axios.get("/api/clients/", { params: {
+            email: account.email, 
+            botName, isSeller: true
+        }}).then(({ data }: { data: Client[] }) => {
+            setClients(data);
+            setFilteredClients(data);
+            setPageCount(Math.ceil(data.length / PER_PAGE));
+        }).catch((error) => {
+            if (error.response.status === 401) setIsAuthenticated(false);
+        });
     }
 
     useEffect(() => {
