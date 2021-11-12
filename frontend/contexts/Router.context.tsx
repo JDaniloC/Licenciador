@@ -5,7 +5,9 @@ import Sellers from 'components/Sellers';
 import Login from 'components/Login';
 
 interface RouterContextData {
+    isAuthenticated: boolean;
     setRoute: (route:string) => void;
+    setIsAuthenticated: (value: boolean) => void;
 }
 
 interface RouterProviderProps {
@@ -26,10 +28,13 @@ export function RouterProvider({
    
     const [bots, _] = useState(rest.bots);
     const [route, setRoute] = useState("login");
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     return (
         <RouterContext.Provider value = {{
-            setRoute
+            setRoute,
+            isAuthenticated, 
+            setIsAuthenticated, 
         }}>
             {children}
             {(route == "login") ?

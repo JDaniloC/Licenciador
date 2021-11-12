@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { RouterContext } from 'contexts/Router.context';
+import { useEffect, useState, useContext } from 'react';
 
 import Head from 'next/head'
 import axios from 'services/api';
@@ -30,21 +31,28 @@ export default function Clients({ bots }: { bots: Bot[] }) {
     const [showBots, setShowBots] = useState(false);
     const [sellerBots, setSellerBots] = useState([]);
 
+    const { setIsAuthenticated } = useContext(RouterContext);
+
     async function loadSellers() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data }: SellersData = await axios.get(
+        axios.get(
             "/api/sellers/", {
             params: { email: account.email }
-        });
-
-        const tempSellers = {};
-        Object.keys(data).forEach(index => {
-            const seller = data[index];
-            if (seller.type === "seller") {
-                tempSellers[seller.email] = seller;
+        }).then(({ data }: SellersData) => {
+            const tempSellers = {};
+            Object.keys(data).forEach(index => {
+                const seller = data[index];
+                if (seller.type === "seller") {
+                    tempSellers[seller.email] = seller;
+                }
+            });
+            setSellers(tempSellers);
+        }).catch((error) => {
+            if (error.response.status === 401) {
+                setIsAuthenticated(false);
             }
         });
-        setSellers(tempSellers);
+
     }
 
     useEffect(() => {
@@ -64,26 +72,35 @@ export default function Clients({ bots }: { bots: Bot[] }) {
                 setSellers(newSellers);
             }
         }
-        const admin = JSON.parse(localStorage.getItem('account')).email;
-    
-        const { data } = await axios.post("/api/sellers/", { 
+        const account = JSON.parse(localStorage.getItem('account'));
+        if (!account) return
+
+
+        const admin = account.email;
+        axios.post("/api/sellers/", { 
             sellerEmail: email, creatorEmail: admin, 
             botList: sellerBots, showBots, tests, 
-        })
-        searchSeller(email, data)
-        
-        setEmail("");
-        setTests("");
-        setLicenses("");
-        setSellerBots([]);
-        setShowBots(false);
+        }).then(({ data }) => {
+            searchSeller(email, data)
+            
+            setEmail("");
+            setTests("");
+            setLicenses("");
+            setSellerBots([]);
+            setShowBots(false);
+        }).catch((error) => {
+            if (error.response.status === 401) {
+                setIsAuthenticated(false);
+            }
+        });
     }
     
     async function deleteSeller() {
-        const admin = JSON.parse(localStorage.getItem('account')).email;
-        if (!email) {
-            return false;
-        }
+        const account = JSON.parse(localStorage.getItem('account'));
+        if (!account) return
+
+
+        const admin = account.email;
         await axios.delete("/api/sellers/", {
             params: { email, creatorEmail: admin }
         }).then(() => {
@@ -92,7 +109,11 @@ export default function Clients({ bots }: { bots: Bot[] }) {
             loadSellers();
             setSellerBots([]);
             setShowBots(false);
-        })
+        }).catch((error) => {
+            if (error.response.status === 401) {
+                setIsAuthenticated(false);
+            }
+        });
     }
     
     function setSelectedBots(check:boolean, name:string) {
