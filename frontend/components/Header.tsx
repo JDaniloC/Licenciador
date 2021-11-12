@@ -1,25 +1,42 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { HeaderContext } from 'contexts/Header.context';
-import { RouterContext} from 'contexts/Router.context';
+import { RouterContext } from 'contexts/Router.context';
 
 import styles from 'styles/components/Header.module.css';
 
 export default function Header() {
-    const { changeDisplay, setCanBack, 
-        licenses, canBack } = useContext(HeaderContext);
-    const { setRoute } = useContext(RouterContext);
+    const { 
+        licenses, canBack,
+        changeDisplay, setCanBack 
+    } = useContext(HeaderContext);
+    const { 
+        setRoute,
+        isAuthenticated
+    } = useContext(RouterContext);
 
     function closeAccount() {
-        localStorage.removeItem('account');
-        localStorage.removeItem('bot');
         setRoute("login");
         changeDisplay("flex");
+        localStorage.removeItem('bot');
+        localStorage.removeItem('account');
     }
+
+    useEffect(() => {
+        if (!isAuthenticated) closeAccount();
+    }, [isAuthenticated]);
     
+    function handleBackButton() {
+        setRoute("botList"); 
+        setCanBack(false);
+    }
+
     return (
         <header className = {styles.header}>
-            <button onClick = {() => {setRoute("botList"); setCanBack(false) }} disabled = {!canBack}
-                style = {{ opacity: (canBack) ? 1 : 0 }}>
+            <button 
+                disabled = {!canBack}
+                onClick = {handleBackButton} 
+                style = {{ opacity: (canBack) ? 1 : 0 }}
+            >
                 <img src="https://img.icons8.com/clouds/344/back.png" alt="back Img"/>
             </button>
             <h1> Licenciador </h1>
@@ -27,7 +44,10 @@ export default function Header() {
                 <p id = "licenseNumber"> {licenses} </p>
                 <img src="/coin.gif"/>
             </div>
-            <button style = {{ opacity: 1 }} onClick = {closeAccount}>
+            <button 
+                style = {{ opacity: 1 }} 
+                onClick = {closeAccount}
+            >
                 <img src="/shutdown.png" alt="exit image"/>
             </button>
         </header>

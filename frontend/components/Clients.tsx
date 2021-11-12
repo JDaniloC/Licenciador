@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import { HeaderContext } from 'contexts/Header.context';
+import { RouterContext} from 'contexts/Router.context';
 
 import Button from 'react-bootstrap/Button';
 import ReactPaginate from 'react-paginate';
@@ -19,6 +20,7 @@ export interface Client {
 
 export default function Clients() {
     const { botName, setLicenses } = useContext(HeaderContext);
+    const { setIsAuthenticated } = useContext(RouterContext);
 
     const [licenseDays, setLicenseDays] = useState(1);
     const [email, setEmail] = useState<string>("");
@@ -35,14 +37,16 @@ export default function Clients() {
 
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data }: { data: Client[] } = await axios.get(
-            "/api/clients/", { params: {
-                email: account.email, botName, isSeller: true
-            }
+        axios.get("/api/clients/", { params: {
+            email: account.email, 
+            botName, isSeller: true
+        }}).then(({ data }: { data: Client[] }) => {
+            setClients(data);
+            setFilteredClients(data);
+            setPageCount(Math.ceil(data.length / PER_PAGE));
+        }).catch((error) => {
+            if (error.response.status === 401) setIsAuthenticated(false);
         });
-        setClients(data);
-        setFilteredClients(data);
-        setPageCount(Math.ceil(data.length / PER_PAGE));
     }
 
     useEffect(() => {
@@ -78,33 +82,41 @@ export default function Clients() {
     
         const account = JSON.parse(localStorage.getItem('account')); 
         const newAccount = JSON.parse(localStorage.getItem('account'))
-        const { data } = await axios.post("/api/licenses/", {
-            sellerEmail: account.email, clientEmail: email, licenseDays, botName
-        })
-       
-        newAccount['licenses'] = data.licenses;
-
-        const newClients = clients.map(client => {
-            if (client.email === data.email) {
-                client.license = data.license;
-                client.updateAt = data.updateAt;
-            }
-            return client;
-        })
-        localStorage.setItem("account", JSON.stringify(newAccount))
-        
-        setClients(newClients);
-        setLicenses(data.licenses);
-        setClientLicenses(data.license);
+        axios.post("/api/licenses/", {
+            sellerEmail: account.email, botName,
+            clientEmail: email, licenseDays, 
+        }).then(({ data }) => {
+            newAccount['licenses'] = data.licenses;
+            newAccount['tests'] = data.tests;
+    
+            const newClients = clients.map(client => {
+                if (client.email === data.email) {
+                    client.license = data.license;
+                    client.updateAt = data.updateAt;
+                }
+                return client;
+            })
+            localStorage.setItem("account", JSON.stringify(newAccount))
+            
+            setClients(newClients);
+            setLicenses(data.licenses);
+            setClientLicenses(data.license);
+        }).catch((error) => {
+            if (error.response.status === 401) setIsAuthenticated(false);
+        });
     }
 
     async function createClient() {
         const account = JSON.parse(localStorage.getItem('account'));
-        const { data } = await axios.post("/api/clients/", {
-            sellerEmail: account.email, clientEmail: newEmail, botName
-        })
-        setNewEmail("");
-        setClients(prevState => [...prevState, data]);
+        axios.post("/api/clients/", {
+            sellerEmail: account.email, 
+            clientEmail: newEmail, botName
+        }).then(({ data }) => {
+            setNewEmail("");
+            setClients(prevState => [...prevState, data]);
+        }).catch((error) => {
+            if (error.response.status === 401) setIsAuthenticated(false);
+        });
     }
     
     async function deleteClient() {
@@ -121,7 +133,9 @@ export default function Clients() {
             setEmail("");
             loadClients();
             setClientLicenses(0);
-        })
+        }).catch((error) => {
+            if (error.response.status === 401) setIsAuthenticated(false);
+        });
     }
 
     function changeLicenseDays(evt) {
