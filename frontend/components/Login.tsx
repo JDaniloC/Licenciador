@@ -25,7 +25,8 @@ export default function Login() {
         changeDisplay
     } = useContext(HeaderContext);
     const {
-        setRoute
+        setRoute,
+        setIsAuthenticated
     } = useContext(RouterContext);
 
     const emailRef = useRef();
@@ -64,7 +65,6 @@ export default function Login() {
             shakeInput(passwordRef.current);   
         } else {
             data["since"] = new Date().getTime();
-            axios.defaults.headers.common['Authorization'] = data.token;
             localStorage.setItem('account', 
                 JSON.stringify(data));
             removeLoginComponent()
@@ -98,7 +98,8 @@ export default function Login() {
     async function removeLoginComponent() {
         const account = await verifyAuthentication();
         if (account === undefined) return
-
+        
+        setIsAuthenticated(true);
         changeDisplay("none");
         if (account.type === "admin") {
             setRoute("sellers");

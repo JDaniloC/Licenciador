@@ -51,7 +51,7 @@ export default async (
     const isAdmin = await verifyRole(
         req, ["admin", "seller"]);
     if (!isAdmin) {
-        return res.status(403).json({ 
+        return res.status(401).json({ 
             error: "UNAUTHORIZED." });
     }
     
