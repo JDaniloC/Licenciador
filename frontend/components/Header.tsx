@@ -6,12 +6,12 @@ import styles from 'styles/components/Header.module.css';
 
 export default function Header() {
     const { 
-        changeDisplay, setCanBack, 
-        licenses, tests, canBack 
+        licenses, canBack,
+        changeDisplay, setCanBack 
     } = useContext(HeaderContext);
     const { 
-        isAuthenticated, 
-        setRoute 
+        setRoute,
+        isAuthenticated
     } = useContext(RouterContext);
 
     function closeAccount() {
@@ -42,10 +42,6 @@ export default function Header() {
             <h1> Licenciador </h1>
             <div>
                 <p id = "licenseNumber"> {licenses} </p>
-                <img src="/coin.gif"/>
-            </div>
-            <div>
-                <p id = "testNumber"> {tests} </p>
                 <img src="/coin.gif"/>
             </div>
             <button 

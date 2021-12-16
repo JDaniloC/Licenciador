@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
+import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import { HeaderContext } from 'contexts/Header.context';
 import { RouterContext} from 'contexts/Router.context';
 
 import Button from 'react-bootstrap/Button';
-import Table from 'react-bootstrap/Table';
 import ReactPaginate from 'react-paginate';
-
+import Table from 'react-bootstrap/Table';
+import Form from 'react-bootstrap/Form';
 import Head from 'next/head'
 import axios from 'services/api';
 import styles from 'styles/components/Clients.module.css';
@@ -18,12 +19,14 @@ export interface Client {
 }
 
 export default function Clients() {
-    const { botName, setTests, setLicenses } = useContext(HeaderContext);
+    const { botName, setLicenses } = useContext(HeaderContext);
     const { setIsAuthenticated } = useContext(RouterContext);
 
+    const [licenseDays, setLicenseDays] = useState(1);
     const [email, setEmail] = useState<string>("");
+
+    const [clientLicenses, setClientLicenses] = useState<number>(0);
     const [newEmail, setNewEmail] = useState<string>("");
-    const [licenses, setClientLicenses] = useState<number>(0);
     const [clients, setClients] = useState<Client[]>([]);
 
     const [pageCount, setPageCount] = useState<number>(0);
@@ -77,12 +80,11 @@ export default function Clients() {
             return;
         }
     
-        const isTest = evt.target.id === "test";
         const account = JSON.parse(localStorage.getItem('account')); 
         const newAccount = JSON.parse(localStorage.getItem('account'))
         axios.post("/api/licenses/", {
             sellerEmail: account.email, botName,
-            clientEmail: email, isTest, 
+            clientEmail: email, licenseDays, 
         }).then(({ data }) => {
             newAccount['licenses'] = data.licenses;
             newAccount['tests'] = data.tests;
@@ -97,12 +99,8 @@ export default function Clients() {
             localStorage.setItem("account", JSON.stringify(newAccount))
             
             setClients(newClients);
+            setLicenses(data.licenses);
             setClientLicenses(data.license);
-            if (isTest) {
-                setTests(data.tests)
-            } else {
-                setLicenses(data.licenses);
-            }
         }).catch((error) => {
             if (error.response.status === 401) setIsAuthenticated(false);
         });
@@ -140,6 +138,11 @@ export default function Clients() {
         });
     }
 
+    function changeLicenseDays(evt) {
+        const value = evt.target.value;
+        setLicenseDays(value);
+    }
+    
     function searchUpdated(evt) {
         setCurrentPage(0);
         setSearchTerm(evt.target.value);
@@ -198,16 +201,20 @@ export default function Clients() {
                 <h2> Dados do cliente </h2>
                 <form>
                     <input value = {email} placeholder = "E-mail" disabled/>
-                    <input type="number" value = {licenses}
+                    <input type="number" value = {clientLicenses}
                         placeholder = "Dias da licença" disabled/>
-                    <div style = {{ margin: "5px 0" }}>
-                        <Button variant = "outline-primary" id = "test"
-                            onClick = {giveLicense}> 
-                            Teste grátis 
-                        </Button>
+                    <div style = {{ margin: "1em 0 0" }}>
+                        <FloatingLabel className="mb-3"
+                                label="Dias de licença"
+                            >
+                            <Form.Control min = {1}
+                                value = {licenseDays} type="number" 
+                                onChange = {changeLicenseDays}/>
+                        </FloatingLabel>
                         <Button variant = "outline-primary" 
+                            style = {{ height: "fit-content" }}
                             onClick = {giveLicense}>
-                            Renovar licença 
+                            Conceder licença
                         </Button>
                     </div>
                     <Button variant = "danger" onClick = {deleteClient}>

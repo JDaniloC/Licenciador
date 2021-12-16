@@ -26,7 +26,6 @@ export interface SellersData {
 export default function Clients({ bots }: { bots: Bot[] }) {
     const [sellers, setSellers] = useState({});
     const [email, setEmail] = useState("");
-    const [tests, setTests] = useState("");
     const [licenses, setLicenses] = useState("");
     const [showBots, setShowBots] = useState(false);
     const [sellerBots, setSellerBots] = useState([]);
@@ -62,7 +61,6 @@ export default function Clients({ bots }: { bots: Bot[] }) {
     async function saveSeller() {
         function searchSeller(email, data) {
             if (sellers.hasOwnProperty(email)) {
-                sellers[email].tests = data.tests;
                 sellers[email].licenses = data.licenses;
                 sellers[email].botList = data.botList;
                 sellers[email].showBots = data.showBots;
@@ -79,12 +77,11 @@ export default function Clients({ bots }: { bots: Bot[] }) {
         const admin = account.email;
         axios.post("/api/sellers/", { 
             sellerEmail: email, creatorEmail: admin, 
-            botList: sellerBots, showBots, tests, 
+            botList: sellerBots, showBots
         }).then(({ data }) => {
             searchSeller(email, data)
             
             setEmail("");
-            setTests("");
             setLicenses("");
             setSellerBots([]);
             setShowBots(false);
@@ -105,7 +102,6 @@ export default function Clients({ bots }: { bots: Bot[] }) {
             params: { email, creatorEmail: admin }
         }).then(() => {
             setEmail("");
-            setTests("");
             loadSellers();
             setSellerBots([]);
             setShowBots(false);
@@ -127,17 +123,14 @@ export default function Clients({ bots }: { bots: Bot[] }) {
     function selectSeller(value: string) {
         let bots: [],
             email = "", 
-            tests = "",
             licenses: "",
             checked = false
         if (value !== "") {
             email = value
             bots = sellers[value].botList
             checked = sellers[value].showBots
-            tests = sellers[value].tests
             licenses = sellers[value].licenses
         }
-        setTests(tests);
         setEmail(email);
         setSellerBots((bots !== undefined) ? bots : []);
         setShowBots(checked);
@@ -171,9 +164,6 @@ export default function Clients({ bots }: { bots: Bot[] }) {
                             onChange = {({ target }) => {setEmail(target.value)}}/>
                         <input type="number" min = {1} value = {licenses}
                             placeholder = "Quantidade de licenças" disabled/>
-                        <input type="number" min = {1} value = {tests}
-                            placeholder = "Quantidade de testes"
-                            onChange = {({ target }) => {setTests(target.value)}}/>
                         <div className = {styles.showBots}>
                             <label htmlFor = "show"> Mostrar demais bots </label>
                             <input type="checkbox" name="show" checked = {showBots}

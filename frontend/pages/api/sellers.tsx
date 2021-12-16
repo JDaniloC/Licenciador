@@ -18,8 +18,8 @@ async function index() {
 
 async function store(body: VercelRequestBody) {
     let { 
-        creatorEmail,
-        sellerEmail, tests, 
+        creatorEmail, 
+        sellerEmail, 
         botList, showBots 
     } = toLowerCase(body);
 
@@ -30,7 +30,7 @@ async function store(body: VercelRequestBody) {
             email: sellerEmail,
             type: "seller",
             licenses: 0,
-            botList, showBots, tests,
+            botList, showBots
         })
     } else {
         seller.botList.forEach(name => {
@@ -41,9 +41,8 @@ async function store(body: VercelRequestBody) {
 
         seller = await Sellers.findOneAndUpdate(
             {email: sellerEmail},
-            { tests, botList, showBots })  
+            { botList, showBots })  
         seller.showBots = showBots;
-        seller.tests = tests;
         seller.botList = botList;
     }
     seller.password = "";

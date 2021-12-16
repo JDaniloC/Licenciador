@@ -8,9 +8,7 @@ interface HeaderContextData {
     canBack: boolean;
     
     setLicenses: (number:number) => void;
-    setTests: (number:number) => void;
     licenses: number;
-    tests: number;
     
     setBotTitle: (string:string) => void;
     setBotName: (string:string) => void;
@@ -32,7 +30,6 @@ export function HeaderProvider({
     const [loginDisplay, setLoginDisplay] = useState("flex")
 
     const [licenses, setLicenses] = useState(0);
-    const [tests, setTests] = useState(0);
     const [canBack, setCanBack] = useState(false);
 
     const [botTitle, setBotTitle] = useState("");
@@ -47,8 +44,7 @@ export function HeaderProvider({
         <HeaderContext.Provider value = {{
             changeDisplay, overlayDisplay,
             loginDisplay, canBack,
-            setLicenses, setTests,
-            licenses, tests,
+            setLicenses, licenses, 
             setCanBack, botName,
             setBotName, botTitle,
             setBotTitle
