@@ -153,10 +153,10 @@ async function store(body: VercelRequestBody) {
 }
 
 async function destroy(query: VercelRequestQuery) {
-    const { seller, email } = toLowerCase(query);
+    const { seller, email, botName } = toLowerCase(query);
 
-    if (!seller || !email) {
-        return { "error": "Missing params." };
+    if (!seller || !email || !botName) {
+        return { "error": "Params required: seller, email, botName" };
     }
 
     let client = await Clients.findOne({ email }) as ClientSchema; 
@@ -170,13 +170,26 @@ async function destroy(query: VercelRequestQuery) {
             await Sellers.findOneAndUpdate(
                 { email: seller }, {$inc: { licenses: -1 }})
         }
+        
+        client.license = client.license.filter(
+            license => license.botName !== botName
+        );
+        
+        if (client.license.length === 0) {
+            await Clients.findOneAndDelete({ email });
+            await Users.findOneAndDelete({ email });
+            storeHistory(seller, `Deleted the ${email} client.`)
+        } else {
+            await Clients.updateOne({ email }, {
+                license: client.license,
+                updateTime: new Date().getTime(), 
+            });
+            storeHistory(seller, `Deleted bot ${botName} of ${email} client.`)
+        }
 
-        await Clients.findOneAndDelete({ email });
-        await Users.findOneAndDelete({ email });
-
-        storeHistory(seller, `Deleted the ${email} client.`)
+        return client;
     }
-    return client;
+    return { "error": "Unauthorized seller!" };
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {

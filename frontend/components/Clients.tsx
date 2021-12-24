@@ -125,11 +125,9 @@ export default function Clients() {
         if (!email) {
             return false;
         }
-        await axios.delete("/api/clients/", {
-            params: {
-                seller: account.email, email
-            }
-        }).then(() => {
+        await axios.delete("/api/clients/", { params: {
+            seller: account.email, email, botName
+        }}).then(() => {
             setEmail("");
             loadClients();
             setClientLicenses(0);
