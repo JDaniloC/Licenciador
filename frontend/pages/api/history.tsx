@@ -1,5 +1,6 @@
 import { VercelRequest, VercelRequestBody, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './database';
+import verifyRole from 'utils/verifyRole';
 
 import Histories from 'models/History';
 import Sellers from 'models/Sellers';
@@ -25,6 +26,12 @@ async function destroy(body: VercelRequestBody) {
 export default async (req: VercelRequest, res: VercelResponse) => {
     await connectToDatabase();
     
+    const isAdmin = await verifyRole(req, ["admin"]);
+    if (!isAdmin) {
+        return res.status(401).json({ 
+            error: "UNAUTHORIZED." });
+    }
+
     switch (req.method) {
         case "GET":
             const allEvents = await Histories.find();

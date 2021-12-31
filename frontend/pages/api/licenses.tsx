@@ -7,10 +7,15 @@ import verifyRole from 'utils/verifyRole';
 
 import Clients from 'models/Clients';
 import Sellers from 'models/Sellers';
+import { License } from 'models/Clients';
 
 async function store(body: VercelRequestBody) {
-    const { sellerEmail, clientEmail,
-        botName, licenseDays } = toLowerCase(body);
+    const { 
+        botName, 
+        sellerEmail, 
+        clientEmail,
+        licenseDays 
+    } = toLowerCase(body);
     
     if (!sellerEmail || !clientEmail || !botName || !licenseDays) {
         return {};
@@ -22,7 +27,6 @@ async function store(body: VercelRequestBody) {
     const result = {
         updateAt: new Date(client.updateTime).toLocaleString("pt-BR"),
         licenses: seller.licenses,
-        tests: seller.tests,
         email: clientEmail,
         license: 0,
     }
@@ -36,7 +40,7 @@ async function store(body: VercelRequestBody) {
     result.licenses += 1;
     
     let foundBot = false;
-    licenseList.forEach(bot => {
+    licenseList.forEach((bot: License) => {
         if (bot.botName === botName) {
             foundBot = true;
             bot.timestamp = agora + 86400 * licenseDays;

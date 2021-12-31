@@ -17,7 +17,7 @@ async function index() {
 }
 
 async function store(body: VercelRequestBody) {
-    let { 
+    const { 
         creatorEmail, 
         sellerEmail, 
         botList, showBots 
