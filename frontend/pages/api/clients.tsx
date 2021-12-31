@@ -23,22 +23,25 @@ async function show(email: string, botName: string, password: string) {
         throw new Error('Client not found');
     }
 
-    if (password !== undefined && client.password !== MD5(password)) {
-        if (client.password) {
-            result.message = "Senha incorreta!"
+    if (["catalogador"].indexOf(botName) !== -1) {
+        if (typeof password === "undefined") {
+            result.message = "Senha necessária!";
             return result;
-        } else {
-            await Clients.findOneAndUpdate(
-                { email }, { password: MD5(password) }
-            );
+        }
+        if (client.password !== MD5(password)) {
+            if (client.password) {
+                result.message = "Senha incorreta! Você alterou a senha?";
+                return result;
+            } else {
+                await Clients.findOneAndUpdate(
+                    { email }, { password: MD5(password) }
+                );
+            }
         }
     }
 
     client.license.forEach(element => {
         if (element.botName === botName) {
-            result[email] = { // deprecated
-                timestamp: element.timestamp
-            }
             result.timestamp = element.timestamp - (
                 new Date().getTime() / 1000);
             result.message = GetRemaining(element.timestamp);
@@ -141,14 +144,7 @@ async function store(body: VercelRequestBody) {
     return {
         license: 0,
         email: clientEmail,
-        updateAt: updateString,
-        
-        // deprecated
-        seller: sellerEmail,
-        since: today, 
-        licenses: {
-            [botName]: 0
-        }
+        updateAt: updateString
     };
 }
 
@@ -201,9 +197,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             return res.status(200).json(response);
         } catch (e) {
             if (e instanceof Error) {
-                return res.status(401).json({ error: "UNAUTHORIZED." });
+                return res.status(401).json({ 
+                    error: "UNAUTHORIZED." 
+                });
             }
-            return res.status(404).json({ error: "Client not found" });
+            return res.status(404).json({ 
+                error: "Client not found" 
+            });
         } 
     }
 

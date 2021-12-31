@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-interface License {
+export interface License {
     botName: string,
     timestamp: number
     updateTime: number,
