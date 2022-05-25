@@ -203,7 +203,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         } 
     }
 
-    const isAdmin = await verifyRole(req, ["seller"]);
+    const isAdmin = await verifyRole(req, ["admin", "seller"]);
     if (!isAdmin) {
         return res.status(401).json({ 
             error: "UNAUTHORIZED." });

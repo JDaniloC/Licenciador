@@ -85,7 +85,7 @@ export default function Clients() {
         setEmail(email);
     }
 
-    async function giveLicense(evt) {
+    async function giveLicense() {
         if (!email) {
             return;
         }
@@ -120,6 +120,9 @@ export default function Clients() {
     }
 
     async function createClient() {
+        if (isAdmin) {
+            return alert("Crie uma conta de vendedor.");
+        }
         axios.post("/api/clients/", {
             sellerEmail, botName,
             clientEmail: newEmail

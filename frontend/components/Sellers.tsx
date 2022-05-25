@@ -164,6 +164,9 @@ export default function Clients({ bots }: { bots: Bot[] }) {
                 <div> 
                     <h2> Cadastrar novo vendedor </h2>
                     <form>
+                        <Button onClick = {showClients}> 
+                            Ver clientes 
+                        </Button>
                         <input type="email" placeholder="E-mail" value = {email}
                             onChange = {({ target }) => {setEmail(target.value)}}/>
                         <input type="number" min = {1} value = {licenses}
@@ -173,9 +176,6 @@ export default function Clients({ bots }: { bots: Bot[] }) {
                             <input type="checkbox" name="show" checked = {showBots}
                                 onChange = {({ target }) => {setShowBots(target.checked)}}/>
                         </div>
-                        <Button onClick = {showClients}> 
-                            Ver clientes 
-                        </Button>
                         <Button onClick = {saveSeller}> 
                             Adicionar/Salvar vendedor 
                         </Button>
