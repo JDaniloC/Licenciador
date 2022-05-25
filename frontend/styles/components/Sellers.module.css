@@ -18,6 +18,9 @@
 .sellers form * {
     padding: 1em;
 }
+.sellers form button {
+    margin-bottom: 1em;
+}
 .botSelection {
     flex: 1 1;
     display: flex;

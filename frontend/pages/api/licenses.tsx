@@ -29,6 +29,7 @@ async function store(body: VercelRequestBody) {
         licenses: seller.licenses,
         email: clientEmail,
         license: 0,
+        botName,
     }
     
     if (!client || seller.botList.indexOf(botName) === -1) {
@@ -75,7 +76,7 @@ async function store(body: VercelRequestBody) {
 export default async (req: VercelRequest, res: VercelResponse) => {
     await connectToDatabase();
     
-    const isAdmin = await verifyRole(req, ["seller"]);
+    const isAdmin = await verifyRole(req, ["seller", "admin"]);
     if (!isAdmin) {
         return res.status(401).json({ 
             error: "UNAUTHORIZED." });

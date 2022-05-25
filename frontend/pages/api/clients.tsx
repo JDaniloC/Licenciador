@@ -50,13 +50,14 @@ async function show(email: string, botName: string, password: string) {
     return result;
 }
 
-async function index(email: string, botName: string) {
+async function index(email: string, botName: string, isAdmin: boolean = false) {
     let result = [];
-    const clientList = await Clients.find({ seller: email }) as ClientSchema[];
+    const query = (isAdmin) ? {} : { seller: email };
+    const clientList = await Clients.find(query) as ClientSchema[];
     if (clientList.length > 0) {
         clientList.forEach(client => {
             client.license.map((element) => {
-                if (element.botName === botName) {
+                if (element.botName === botName || isAdmin) {
                     let timestamp = element.timestamp - (
                         new Date().getTime() / 1000);
                     if (timestamp < 0) {
@@ -74,7 +75,9 @@ async function index(email: string, botName: string) {
 
                     result.push({
                         email: client.email,
+                        seller: client.seller,
                         updateAt: updateString,
+                        botName: element.botName,
                         license: Math.round(timestamp)
                     })
                 }
@@ -85,16 +88,14 @@ async function index(email: string, botName: string) {
 }
 
 async function getClient(req: VercelRequest) {
-    const { email, botName, isSeller, password } = toLowerCase(req.query);
-    if (isSeller) {
-        const isAdmin = await verifyRole(req, ["seller"]);
-        if (!isAdmin) {
-            throw new Error("Unauthorized");
-        }
+    const { email, botName, password } = toLowerCase(req.query);
+    const reqRole = await verifyRole(req, ["admin", "seller"]);
+    if (reqRole === "seller") {
         return await index(email, botName);
-    } else {
-        return await show(email, botName, password);
+    } else if (reqRole === "admin") {
+        return await index(email, botName, true);
     }
+    return await show(email, botName, password);
 }
 
 async function store(body: VercelRequestBody) {
@@ -196,18 +197,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             const response = await getClient(req);
             return res.status(200).json(response);
         } catch (e) {
-            if (e instanceof Error) {
-                return res.status(401).json({ 
-                    error: "UNAUTHORIZED." 
-                });
-            }
             return res.status(404).json({ 
                 error: "Client not found" 
             });
         } 
     }
 
-    const isAdmin = await verifyRole(req, ["seller"]);
+    const isAdmin = await verifyRole(req, ["admin", "seller"]);
     if (!isAdmin) {
         return res.status(401).json({ 
             error: "UNAUTHORIZED." });
