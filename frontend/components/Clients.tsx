@@ -21,9 +21,10 @@ export interface Client {
 }
 
 export default function Clients() {
-    const { botName, setLicenses } = useContext(HeaderContext);
+    const { botName, setBotName, setLicenses } = useContext(HeaderContext);
     const { setIsAuthenticated } = useContext(RouterContext);
 
+    const [sellerEmail, setSellerEmail] = useState(false);
     const [licenseDays, setLicenseDays] = useState(1);
     const [email, setEmail] = useState<string>("");
     const [isAdmin, setIsAdmin] = useState(false);
@@ -40,7 +41,10 @@ export default function Clients() {
 
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
-        if (account.type === "admin") setIsAdmin(true);
+        if (account.type === "admin") {
+            setIsAdmin(true);
+        }
+        setSellerEmail(account.email);
         axios.get("/api/clients/", { params: {
             email: account.email, botName,
         }}).then(({ data }: { data: Client[] }) => {
@@ -68,16 +72,17 @@ export default function Clients() {
     }, [searchTerm, clients])
 
     function selectClient({ target }) {
-        const value = target.value;
-        let days = 0;
-        clients.map(client => {
-            if (client.email == value) {
-                days = client.license;
+        const { email, seller, bot } = target.dataset;
+        for (let index = 0; index < clients.length; index++) {
+            const client = clients[index];
+            if (client.email == email && client.botName == bot) {
                 setClientLicenses(client.license);
+                break;
             } 
-        })
-        
-        setEmail(value);
+        }
+        setSellerEmail(seller);
+        setBotName(bot);
+        setEmail(email);
     }
 
     async function giveLicense(evt) {
@@ -85,23 +90,26 @@ export default function Clients() {
             return;
         }
     
-        const account = JSON.parse(localStorage.getItem('account')); 
         const newAccount = JSON.parse(localStorage.getItem('account'))
         axios.post("/api/licenses/", {
-            sellerEmail: account.email, botName,
+            sellerEmail, botName,
             clientEmail: email, licenseDays, 
         }).then(({ data }) => {
             newAccount['licenses'] = data.licenses;
             newAccount['tests'] = data.tests;
     
             const newClients = clients.map(client => {
-                if (client.email === data.email) {
+                if (client.botName === data.botName && 
+                    client.email === data.email) {
                     client.license = data.license;
                     client.updateAt = data.updateAt;
                 }
                 return client;
             })
-            localStorage.setItem("account", JSON.stringify(newAccount))
+            if (!isAdmin) {
+                localStorage.setItem("account",
+                    JSON.stringify(newAccount))
+            }
             
             setClients(newClients);
             setLicenses(data.licenses);
@@ -112,10 +120,9 @@ export default function Clients() {
     }
 
     async function createClient() {
-        const account = JSON.parse(localStorage.getItem('account'));
         axios.post("/api/clients/", {
-            sellerEmail: account.email, 
-            clientEmail: newEmail, botName
+            sellerEmail, botName,
+            clientEmail: newEmail
         }).then(({ data }) => {
             setNewEmail("");
             setClients(prevState => [...prevState, data]);
@@ -125,13 +132,11 @@ export default function Clients() {
     }
     
     async function deleteClient() {
-        const account = JSON.parse(localStorage.getItem('account'));
-
         if (!email) {
             return false;
         }
         await axios.delete("/api/clients/", { params: {
-            seller: account.email, email, botName
+            seller: sellerEmail, email, botName
         }}).then(() => {
             setEmail("");
             loadClients();
@@ -285,7 +290,9 @@ export default function Clients() {
                             <td> {client.license} </td>
                             <td> {client.updateAt} </td>
                             <Button variant = "outline-primary"
-                                value = {client.email}
+                                data-email = {client.email}
+                                data-bot = {client.botName}
+                                data-seller = {client.seller}
                                 onClick = {selectClient}>
                                 Visualizar
                             </Button>

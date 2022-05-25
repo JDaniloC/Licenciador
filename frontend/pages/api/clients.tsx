@@ -89,20 +89,13 @@ async function index(email: string, botName: string, isAdmin: boolean = false) {
 
 async function getClient(req: VercelRequest) {
     const { email, botName, password } = toLowerCase(req.query);
-    const reqRole = await verifyRole(req, ["admin"]);
+    const reqRole = await verifyRole(req, ["admin", "seller"]);
     if (reqRole === "seller") {
-        if (!reqRole) {
-            throw new Error("Unauthorized");
-        }
         return await index(email, botName);
     } else if (reqRole === "admin") {
-        if (!reqRole) {
-            throw new Error("Unauthorized");
-        }
         return await index(email, botName, true);
-    } else {
-        return await show(email, botName, password);
     }
+    return await show(email, botName, password);
 }
 
 async function store(body: VercelRequestBody) {
@@ -204,11 +197,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             const response = await getClient(req);
             return res.status(200).json(response);
         } catch (e) {
-            if (e instanceof Error) {
-                return res.status(401).json({ 
-                    error: "UNAUTHORIZED." 
-                });
-            }
             return res.status(404).json({ 
                 error: "Client not found" 
             });

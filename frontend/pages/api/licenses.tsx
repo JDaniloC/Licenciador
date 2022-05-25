@@ -29,6 +29,7 @@ async function store(body: VercelRequestBody) {
         licenses: seller.licenses,
         email: clientEmail,
         license: 0,
+        botName,
     }
     
     if (!client || seller.botList.indexOf(botName) === -1) {
