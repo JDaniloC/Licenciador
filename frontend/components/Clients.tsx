@@ -13,6 +13,8 @@ import styles from 'styles/components/Clients.module.css';
 
 const PER_PAGE = 5;
 export interface Client {
+    botName: string;
+    seller: string;
     email: string;
     license: number;
     updateAt: string;
@@ -24,6 +26,7 @@ export default function Clients() {
 
     const [licenseDays, setLicenseDays] = useState(1);
     const [email, setEmail] = useState<string>("");
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const [clientLicenses, setClientLicenses] = useState<number>(0);
     const [newEmail, setNewEmail] = useState<string>("");
@@ -37,9 +40,9 @@ export default function Clients() {
 
     async function loadClients() {
         const account = JSON.parse(localStorage.getItem('account'));
+        if (account.type === "admin") setIsAdmin(true);
         axios.get("/api/clients/", { params: {
-            email: account.email, 
-            botName, isSeller: true
+            email: account.email, botName,
         }}).then(({ data }: { data: Client[] }) => {
             setClients(data);
             setFilteredClients(data);
@@ -68,11 +71,13 @@ export default function Clients() {
         const value = target.value;
         let days = 0;
         clients.map(client => {
-            if (client.email === value) days = client.license;
+            if (client.email == value) {
+                days = client.license;
+                setClientLicenses(client.license);
+            } 
         })
         
         setEmail(value);
-        setClientLicenses(days);
     }
 
     async function giveLicense(evt) {
@@ -162,7 +167,15 @@ export default function Clients() {
             )).slice(start, end);
         } else if (sortCriteria === "license") {
             return filteredClients.sort((a, b) => (
-                b.license - a.license
+                b.license > a.license ? 1 : -1
+            )).slice(start, end);
+        } else if (sortCriteria === "botName") {
+            return filteredClients.sort((a, b) => (
+                b.botName > a.botName ? 1 : -1
+            )).slice(start, end);
+        } else if (sortCriteria === "seller") {
+            return filteredClients.sort((a, b) => (
+                b.seller > a.seller ? 1 : -1
             )).slice(start, end);
         } else {
             return filteredClients.sort((a, b) => (
@@ -233,6 +246,18 @@ export default function Clients() {
             <Table hover>
                 <thead>
                     <tr>
+                        {isAdmin && (
+                            <>
+                            <th data-criteria = "botName"
+                                onClick = {handleChangeCriteria}> 
+                                Bot 
+                            </th>
+                            <th data-criteria = "seller"
+                                onClick = {handleChangeCriteria}> 
+                                Vendedor 
+                            </th>
+                            </>
+                        )}
                         <th data-criteria = "email"
                             onClick = {handleChangeCriteria}> 
                             E-mail 
@@ -249,7 +274,13 @@ export default function Clients() {
                 </thead>
                 <tbody>
                     {orderTable().map((client) => (
-                        <tr key = {client.email}>
+                        <tr key = {client.email + client.botName}>
+                            {isAdmin && (
+                                <>
+                                <td> {client.botName} </td>
+                                <td> {client.seller} </td>
+                                </>
+                            )}
                             <td> {client.email} </td>
                             <td> {client.license} </td>
                             <td> {client.updateAt} </td>

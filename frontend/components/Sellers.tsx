@@ -30,7 +30,7 @@ export default function Clients({ bots }: { bots: Bot[] }) {
     const [showBots, setShowBots] = useState(false);
     const [sellerBots, setSellerBots] = useState([]);
 
-    const { setIsAuthenticated } = useContext(RouterContext);
+    const { setIsAuthenticated, setRoute } = useContext(RouterContext);
 
     async function loadSellers() {
         const account = JSON.parse(localStorage.getItem('account'));
@@ -136,6 +136,10 @@ export default function Clients({ bots }: { bots: Bot[] }) {
         setShowBots(checked);
         setLicenses(licenses);
     }
+
+    function showClients() {
+        setRoute("clients");
+    }
     
     return (<>
         <Head>
@@ -169,6 +173,9 @@ export default function Clients({ bots }: { bots: Bot[] }) {
                             <input type="checkbox" name="show" checked = {showBots}
                                 onChange = {({ target }) => {setShowBots(target.checked)}}/>
                         </div>
+                        <Button onClick = {showClients}> 
+                            Ver clientes 
+                        </Button>
                         <Button onClick = {saveSeller}> 
                             Adicionar/Salvar vendedor 
                         </Button>

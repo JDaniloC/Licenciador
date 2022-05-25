@@ -50,13 +50,14 @@ async function show(email: string, botName: string, password: string) {
     return result;
 }
 
-async function index(email: string, botName: string) {
+async function index(email: string, botName: string, isAdmin: boolean = false) {
     let result = [];
-    const clientList = await Clients.find({ seller: email }) as ClientSchema[];
+    const query = (isAdmin) ? {} : { seller: email };
+    const clientList = await Clients.find(query) as ClientSchema[];
     if (clientList.length > 0) {
         clientList.forEach(client => {
             client.license.map((element) => {
-                if (element.botName === botName) {
+                if (element.botName === botName || isAdmin) {
                     let timestamp = element.timestamp - (
                         new Date().getTime() / 1000);
                     if (timestamp < 0) {
@@ -74,7 +75,9 @@ async function index(email: string, botName: string) {
 
                     result.push({
                         email: client.email,
+                        seller: client.seller,
                         updateAt: updateString,
+                        botName: element.botName,
                         license: Math.round(timestamp)
                     })
                 }
@@ -85,13 +88,18 @@ async function index(email: string, botName: string) {
 }
 
 async function getClient(req: VercelRequest) {
-    const { email, botName, isSeller, password } = toLowerCase(req.query);
-    if (isSeller) {
-        const isAdmin = await verifyRole(req, ["seller"]);
-        if (!isAdmin) {
+    const { email, botName, password } = toLowerCase(req.query);
+    const reqRole = await verifyRole(req, ["admin"]);
+    if (reqRole === "seller") {
+        if (!reqRole) {
             throw new Error("Unauthorized");
         }
         return await index(email, botName);
+    } else if (reqRole === "admin") {
+        if (!reqRole) {
+            throw new Error("Unauthorized");
+        }
+        return await index(email, botName, true);
     } else {
         return await show(email, botName, password);
     }

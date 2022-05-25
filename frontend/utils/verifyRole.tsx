@@ -16,5 +16,5 @@ export default async function verifyRole(
     if (!seller || roles.indexOf(seller.type) === -1) {
         return false;
     }
-    return true
+    return seller.type
 }
