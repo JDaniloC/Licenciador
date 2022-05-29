@@ -12,9 +12,10 @@ section.login form {
     align-items: center;
     justify-content: space-around;
     
-    padding: 1em;
-    background-color: #fff;
     z-index: 2;
+    padding: 1em;
+    border-radius: 4px;
+    background-color: #fff;
 }
 
 section.login form * {
@@ -29,8 +30,18 @@ section.login form input {
     margin-bottom: 0.4em;
 }
 section.login form button {
+    width: 200px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    width: 200px
+    justify-content: center;
+
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 20px;
+    background-color: #35a947;
+}
+section.login form button:hover {
+    background-color: #2d8f3c;
 }
