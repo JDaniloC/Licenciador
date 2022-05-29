@@ -143,8 +143,10 @@ async function store(body: VercelRequestBody) {
 
     const updateString = new Date(today).toLocaleString("pt-BR");
     return {
+        botName,
         license: 0,
         email: clientEmail,
+        seller: sellerEmail,
         updateAt: updateString
     };
 }

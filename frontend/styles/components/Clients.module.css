@@ -4,6 +4,7 @@
 }
 .clients div {
     margin: 1em;
+    margin-bottom: 0;
 }
 .clients select {
     padding: 1em;
@@ -17,8 +18,34 @@
 .clients form * {
     padding: 1em;
 }
+.clients ul {
+    max-height: 3em;
+    overflow: auto;
+    padding: 0;
+    margin: 0;
+}
+.clients li {
+    padding: 10px;
+    list-style: none;
+    margin-bottom: 1px;
+    border-radius: 4px;
+    border: solid #CCC 1px;
+}
+.clients .selectedClients {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-.search {
+.clients .selectedClients span,
+.searchContainer span {
+    padding: 6px 1em;
+    list-style: none;
+    border-radius: 4px;
+    border: solid #CCC 1px;
+}
+
+.searchContainer input {
     min-height: 2em;
     width: clamp(10em, 25em, 30em);
     margin: 1em;
