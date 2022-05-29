@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useState } from 'react';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import { HeaderContext } from 'contexts/Header.context';
 import { RouterContext} from 'contexts/Router.context';
@@ -37,6 +37,7 @@ export default function Clients() {
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [sortCriteria, setSortCriteria] = useState<string>("email");
+    const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
     const [filteredClients, setFilteredClients] = useState<Client[]>([]);
 
     async function loadClients() {
@@ -86,37 +87,40 @@ export default function Clients() {
     }
 
     async function giveLicense() {
-        if (!email) {
+        if (!email && selectedEmails.length === 0) {
             return;
         }
     
-        const newAccount = JSON.parse(localStorage.getItem('account'))
-        axios.post("/api/licenses/", {
-            sellerEmail, botName,
-            clientEmail: email, licenseDays, 
-        }).then(({ data }) => {
-            newAccount['licenses'] = data.licenses;
-            newAccount['tests'] = data.tests;
-    
-            const newClients = clients.map(client => {
-                if (client.botName === data.botName && 
-                    client.email === data.email) {
-                    client.license = data.license;
-                    client.updateAt = data.updateAt;
+        const newAccount = JSON.parse(localStorage.getItem('account'));
+        const emailList = selectedEmails.length > 0 ? selectedEmails : [email];
+        emailList.forEach((email) => {
+            axios.post("/api/licenses/", {
+                sellerEmail, botName,
+                clientEmail: email, licenseDays, 
+            }).then(({ data }) => {
+                newAccount['licenses'] = data.licenses;
+                newAccount['tests'] = data.tests;
+        
+                const newClients = clients.map(client => {
+                    if (client.botName === data.botName && 
+                        client.email === data.email) {
+                        client.license = data.license;
+                        client.updateAt = data.updateAt;
+                    }
+                    return client;
+                })
+                if (!isAdmin) {
+                    localStorage.setItem("account",
+                        JSON.stringify(newAccount))
                 }
-                return client;
-            })
-            if (!isAdmin) {
-                localStorage.setItem("account",
-                    JSON.stringify(newAccount))
-            }
-            
-            setClients(newClients);
-            setLicenses(data.licenses);
-            setClientLicenses(data.license);
-        }).catch((error) => {
-            if (error.response.status === 401) setIsAuthenticated(false);
-        });
+                
+                setClients(newClients);
+                setLicenses(data.licenses);
+                setClientLicenses(data.license);
+            }).catch((error) => {
+                if (error.response.status === 401) setIsAuthenticated(false);
+            });
+        })
     }
 
     async function createClient() {
@@ -135,18 +139,22 @@ export default function Clients() {
     }
     
     async function deleteClient() {
-        if (!email) {
+        if (!email && selectedEmails.length === 0) {
             return false;
         }
-        await axios.delete("/api/clients/", { params: {
-            seller: sellerEmail, email, botName
-        }}).then(() => {
-            setEmail("");
-            loadClients();
-            setClientLicenses(0);
-        }).catch((error) => {
-            if (error.response.status === 401) setIsAuthenticated(false);
+        const emailList = selectedEmails.length > 0 ? selectedEmails : [email];
+        emailList.forEach(async (email) => {
+            await axios.delete("/api/clients/", { params: {
+                seller: sellerEmail, email, botName
+            }}).then(() => {
+                setEmail("");
+                loadClients();
+                setClientLicenses(0);
+            }).catch((error) => {
+                if (error.response.status === 401) setIsAuthenticated(false);
+            });
         });
+        setSelectedEmails([]);
     }
 
     function changeLicenseDays(evt) {
@@ -192,6 +200,25 @@ export default function Clients() {
         }
     }
 
+    function selectEmail(event: ChangeEvent<HTMLInputElement>) {
+        const email = event.target.value;
+        const newSelected = [...selectedEmails];
+        if (newSelected.includes(email)) {
+            newSelected.splice(newSelected.indexOf(email), 1);
+        } else {
+            newSelected.push(email);
+        }
+        setSelectedEmails(newSelected);
+    }
+
+    function isSelected(email: string) {
+        return selectedEmails.includes(email);
+    }
+
+    function cleanSelection() {
+        setSelectedEmails([]);
+    }
+
     return (<>
         <Head>
             <title> Licenciador | Clients </title>
@@ -215,6 +242,25 @@ export default function Clients() {
                         </Button>
                     </form>
                 </div>
+                { !isAdmin && selectedEmails.length > 0 && (
+                    <div>
+                        <h2> Clientes selecionados </h2>
+                        <ul>
+                            {selectedEmails.map(email => (
+                                <li key={email}> {email} </li>
+                            ))}
+                        </ul>
+                        <div className = {styles.selectedClients}>
+                            <span>
+                                {selectedEmails.length} selecionado(s)
+                            </span>
+                            <Button variant = "outline-danger"
+                                onClick = {cleanSelection}>
+                                Limpar seleção
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </section>
             <section className = {styles.clientSettings}>
                 <h2> Dados do cliente </h2>
@@ -224,8 +270,7 @@ export default function Clients() {
                         placeholder = "Dias da licença" disabled/>
                     <div style = {{ margin: "1em 0 0" }}>
                         <FloatingLabel className="mb-3"
-                                label="Dias de licença"
-                            >
+                            label="Dias de licença">
                             <Form.Control min = {1}
                                 value = {licenseDays} type="number" 
                                 onChange = {changeLicenseDays}/>
@@ -233,28 +278,33 @@ export default function Clients() {
                         <Button variant = "outline-primary" 
                             style = {{ height: "fit-content" }}
                             onClick = {giveLicense}>
-                            Conceder licença
+                            Conceder licença(s)
                         </Button>
                     </div>
                     <Button variant = "danger" onClick = {deleteClient}>
-                        Deletar usuário 
+                        Deletar usuário(s)
                     </Button>
                 </form>
             </section>
         </section>
-        <input 
-            type = "text" 
-            value = {searchTerm} 
-            onChange={searchUpdated}
-            className = {styles.search}
-            placeholder = {"Buscar cliente..."}
-        />
         
+        <div className = {styles.searchContainer}>
+            <input 
+                type = "text" 
+                value = {searchTerm} 
+                onChange={searchUpdated}
+                placeholder = {"Buscar cliente..."}
+            />
+            <span>
+                {filteredClients.length} e-mail(s) encontrado(s)
+            </span>
+        </div>
+
         <section className = {styles.clientList}>
             <Table hover>
                 <thead>
                     <tr>
-                        {isAdmin && (
+                        {isAdmin ? (
                             <>
                             <th data-criteria = "botName"
                                 onClick = {handleChangeCriteria}> 
@@ -265,6 +315,8 @@ export default function Clients() {
                                 Vendedor 
                             </th>
                             </>
+                        ) : (
+                            <th></th>
                         )}
                         <th data-criteria = "email"
                             onClick = {handleChangeCriteria}> 
@@ -283,11 +335,16 @@ export default function Clients() {
                 <tbody>
                     {orderTable().map((client) => (
                         <tr key = {client.email + client.botName}>
-                            {isAdmin && (
+                            {isAdmin ? (
                                 <>
                                 <td> {client.botName} </td>
                                 <td> {client.seller} </td>
                                 </>
+                            ) : (
+                                <input type="checkbox" name="clients"
+                                    value = {client.email}
+                                    onChange = {selectEmail}
+                                    checked = {isSelected(client.email)}/>
                             )}
                             <td> {client.email} </td>
                             <td> {client.license} </td>
@@ -304,18 +361,18 @@ export default function Clients() {
                 </tbody>
             </Table>
             <ReactPaginate
-                previousLabel={'Anterior'}
-                nextLabel={'Próximo'}
                 breakLabel={'...'}
-                marginPagesDisplayed={1}
-                pageRangeDisplayed={1}
+                nextLabel={'Próximo'}
+                previousLabel={'Anterior'}
                 pageCount={pageCount}
+                pageRangeDisplayed={1}
+                marginPagesDisplayed={1}
                 onPageChange={handlePaginate}
                 containerClassName={"pagination"}
-                previousLinkClassName={"pagination__link"}
                 nextLinkClassName={"pagination__link"}
-                disabledClassName={"pagination__link--disabled"}
+                previousLinkClassName={"pagination__link"}
                 activeClassName={"pagination__link--active"}
+                disabledClassName={"pagination__link--disabled"}
             />
         </section>
     </>)    
