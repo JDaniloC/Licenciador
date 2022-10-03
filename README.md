@@ -33,7 +33,7 @@ MONGODB_URI = mongodb+srv://
 SECRET = p"´@na{>
 ```
 
-Por fim, inicie o projeto:
+o **MONGODB_URI** é obtido através do MongoDB na opção de conectar ao cluster criado, enquanto o **SECRET** é criado pelo próprio desenvolvedor, conquanto que seja forte. Por fim, inicie o projeto:
 ```bash
 cd frontend
 yarn install
@@ -41,7 +41,28 @@ yarn dev
 ```
 
 Assim que o processo terminar, abra no seu navegador a página `localhost:3000`.
-</p>
+
+### Collections no MongoDB e dados
+
+Em teoria as collections serão criadas automaticamente pelo MongoDB, mas ainda assim, você pode verificar as collections que serão criadas na pasta de [models](./frontend/models/), que são:
+
+- **Bots**: armazena os dados dos bots cadastrados, [ver Bot Schema](#bot-schema).
+- **Clients**: armazena os dados dos clientes cadastrados, [ver Client Schema](#client-schema).
+- **Users**: armazena os dados das operações por usuário, [ver Users Schema](#users-schema).
+- **Sellers**: armazena os dados dos vendedores/ADMS cadastrados, [ver Seller Schema](#sellers-schema).
+- **History**: armazena os eventos do sistema, [ver History Schema](#history-schema).
+
+**Importante**
+É necessário registrar o primeiro ADM no sistema o qual será um documento na collection de sellers com os seguintes campos:
+```json
+{
+  "_id": ObjectId('...'), // id gerado automaticamente
+  "email": "EMAIL_DO_ADMINISTRADOR", // email do ADM
+  "password": "SENHA_CRIPTOGRAFADA", // senha criptografada em MD5
+  "type": "admin" // Para ser identificado como ADM
+}
+```
+**É importante** que a senha do ADM seja criptografada em MD5, pois o sistema utiliza essa criptografia para autenticar os usuários.
 
 ## API serverless
 
