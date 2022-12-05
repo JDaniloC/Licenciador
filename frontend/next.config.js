@@ -1,4 +1,8 @@
 module.exports = {
+  experimental: {
+    runtime: 'experimental-edge',
+    serverComponents: true,
+  },
   images: {
       disableStaticImages: true,
   },
